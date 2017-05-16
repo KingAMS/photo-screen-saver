@@ -1,166 +1,176 @@
 /*
-@@license
-*/
+ *  Copyright (c) 2015-2017, Michael A. Updike All rights reserved.
+ *  Licensed under the BSD-3-Clause
+ *  https://opensource.org/licenses/BSD-3-Clause
+ *  https://github.com/opus1269/photo-screen-saver/blob/master/LICENSE.md
+ */
 (function() {
 	'use strict';
 
 	/**
-	 * Event: Called when extension is installed or updated or Chrome is updated
-	 *
+	 * The background script for the extension.<br>
+	 * @namespace app.Background
 	 */
-	function onInstalled() {
+
+	/**
+	 * Display the options tab
+	 * @private
+	 * @memberOf app.Background
+	 */
+	function _showOptionsTab() {
+		// send message to the option tab to focus it.
+		chrome.runtime.sendMessage({
+			message: 'highlight',
+		}, null, function(response) {
+			if (!response) {
+				// no one listening, create it
+				chrome.tabs.create({url: '../html/options.html'});
+			}
+		});
+	}
+
+	/**
+	 * Toggle enabled state of the screen saver
+	 * @private
+	 * @memberOf app.Background
+	 */
+	function _toggleEnabled() {
+		app.Storage.set('enabled', !app.Storage.getBool('enabled'));
+		// storage changed event not fired on same page as the change
+		app.Data.processState('enabled');
+	}
+
+	/**
+	 * Event: Fired when the extension is first installed,<br />
+	 * when the extension is updated to a new version,<br />
+	 * and when Chrome is updated to a new version.
+	 * @see https://developer.chrome.com/extensions/runtime#event-onInstalled
+	 * @param {Object} details - type of event
+	 * @private
+	 * @memberOf app.Background
+	 */
+	function _onInstalled(details) {
 		// create menus on the right click menu of the extension icon
-		chrome.contextMenus.create({type: 'normal', id: 'ENABLE_MENU', title: 'Disable', contexts: ['browser_action']});
-		chrome.contextMenus.create({type: 'separator', id: 'SEP_MENU', contexts: ['browser_action']});
+		chrome.contextMenus.create({
+			type: 'normal',
+			id: 'ENABLE_MENU',
+			title: app.Utils.localize('disable'),
+			contexts: ['browser_action'],
+		});
+		chrome.contextMenus.create({
+			type: 'separator',
+			id: 'SEP_MENU',
+			contexts: ['browser_action'],
+		});
 
-		bgUtils.initData(false);
-		bgUtils.processState('all');
-	}
-
-	/**
-	 * Event: Called when Chrome first starts
-	 *
-	 */
-	function onStartup() {
-		bgUtils.processState('all');
-	}
-
-	/**
-	 * Event: Called when user clicks on extension icon
-	 *
-	 */
-	function onIconClicked() {
-		bgUtils.showOptionsTab();
-	}
-
-	/**
-	 * Event: Called when item in local storage changes
-	 *
-	 * @param {Event} event
-	 *
-	 */
-	function onStorageChanged(event) {
-		bgUtils.processState(event.key);
-	}
-
-	/**
-	 * Event: Called when computer idle state changes
-	 *
-	 * @param {String} state current state of computer
-	 *
-	 */
-	function onIdleStateChanged(state) {
-		if (state === 'idle' && bgUtils.isActive()) {
-			bgUtils.displayScreenSaver();
-		} else {
-			// delay close a little to allow time to process mouse and keyboard
-			chrome.alarms.create('close', {when: Date.now() + 250});
+		if (details.reason === 'install') {
+			app.Data.initialize();
+			_showOptionsTab();
+		} else if (details.reason === 'update') {
+			// extension updated
+			app.Data.update();
 		}
 	}
 
 	/**
-	 * Event: Called when alarm is raised
-	 *
-	 * @param {Object} alarm chrome.alarms.Alarm
-	 *
+	 * Event: Fired when a profile that has this extension installed first
+	 * starts up
+	 * @see https://developer.chrome.com/extensions/runtime#event-onStartup
+	 * @private
+	 * @memberOf app.Background
 	 */
-	function onAlarm(alarm) {
-		switch (alarm.name) {
-			case 'activeStart':
-				// entering active time range of keep awake
-				bgUtils.setActiveState();
-				break;
-			case 'activeStop':
-				// leaving active time range of keep awake
-				bgUtils.setInactiveState();
-				break;
-			case 'updatePhotos':
-				// get the latest for the live photo streams
-				photoSources.processDaily();
-				break;
-			case 'close':
-				// close screen savers
-				bgUtils.closeScreenSavers();
-				break;
-			case 'setBadgeText':
-				// set the icons text
-				var text = '';
-				if (myUtils.getBool('enabled')) {
-					text = bgUtils.isActive() ? '' : 'SLP';
-				} else {
-					text = myUtils.getBool('keepAwake') ? 'PWR' : 'OFF';
-				}
-				chrome.browserAction.setBadgeText({text: text});
-				break;
-			default:
-				break;
-		}
+	function _onStartup() {
+		app.Data.processState();
 	}
 
 	/**
-	 * Event: Called when chrome menu is clicked
-	 *
-	 * @param {Object} info
-	 *
+	 * Event: Fired when a browser action icon is clicked.
+	 * @see https://goo.gl/abVwKu
+	 * @private
+	 * @memberOf app.Background
 	 */
-	function onMenuClicked(info) {
+	function _onIconClicked() {
+		_showOptionsTab();
+	}
+
+	/**
+	 * Event: Fired when item in localStorage changes
+	 * @see https://developer.mozilla.org/en-US/docs/Web/Events/storage
+	 * @param {Event} event - StorageEvent
+	 * @param {string} event.key - storage item that changed
+	 * @private
+	 * @memberOf app.Background
+	 */
+	function _onStorageChanged(event) {
+		app.Data.processState(event.key);
+	}
+
+	/**
+	 * Event: Fired when a context menu item is clicked.
+	 * @see https://developer.chrome.com/extensions/contextMenus#event-onClicked
+	 * @param {Object} info - info. on the clicked menu
+	 * @param {Object} info.menuItemId - menu name
+	 * @private
+	 * @memberOf app.Background
+	 */
+	function _onMenuClicked(info) {
 		if (info.menuItemId === 'ENABLE_MENU') {
-			bgUtils.toggleEnabled();
+			_toggleEnabled();
 		}
 	}
 
 	/**
-	 * Event: Called when registered key combination is pressed
-	 *
-	 * @param {String} cmd
-	 *
+	 * Event: Fired when a registered command is activated using
+	 * a keyboard shortcut.
+	 * @see https://developer.chrome.com/extensions/commands#event-onCommand
+	 * @param {string} cmd - keyboard command
+	 * @private
+	 * @memberOf app.Background
 	 */
-	function onKeyCommand(cmd) {
+	function _onKeyCommand(cmd) {
 		if (cmd === 'toggle-enabled') {
-			bgUtils.toggleEnabled();
+			_toggleEnabled();
 		}
 	}
 
+	// noinspection JSUnusedLocalSymbols
 	/**
-	 * Message: Called when chrome message is sent
-	 *
-	 * @param {Object} request
-	 *
+	 * Event: Fired when a message is sent from either an extension process<br>
+	 * (by runtime.sendMessage) or a content script (by tabs.sendMessage).
+	 * @see https://developer.chrome.com/extensions/runtime#event-onMessage
+	 * @param {Object} request - details for the message
+	 * @param {string} request.message - name of the message
+	 * @param {Object} sender - MessageSender object
+	 * @param {function} response - function _to call once after processing
+	 * @returns {boolean} true if asynchronous
+	 * @private
+	 * @memberOf app.Background
 	 */
-	function onMessage(request) {
-		if (request.window === 'show') {
-			bgUtils.displayScreenSaver(true);
-		} else if (request.message === 'restoreDefaults') {
-			bgUtils.initData(true);
-			bgUtils.processState('all');
+	function _onChromeMessage(request, sender, response) {
+		if (request.message === 'restoreDefaults') {
+			app.Data.restoreDefaults();
 		}
+		return false;
 	}
 
 	// listen for extension install or update
-	chrome.runtime.onInstalled.addListener(onInstalled);
+	chrome.runtime.onInstalled.addListener(_onInstalled);
 
 	// listen for Chrome starting
-	chrome.runtime.onStartup.addListener(onStartup);
+	chrome.runtime.onStartup.addListener(_onStartup);
 
 	// listen for click on the icon
-	chrome.browserAction.onClicked.addListener(onIconClicked);
+	chrome.browserAction.onClicked.addListener(_onIconClicked);
 
 	// listen for changes to the stored data
-	addEventListener('storage', onStorageChanged, false);
+	addEventListener('storage', _onStorageChanged, false);
 
-	// listen for changes to the idle state of the computer
-	chrome.idle.onStateChanged.addListener(onIdleStateChanged);
-
-	// listen for alarms
-	chrome.alarms.onAlarm.addListener(onAlarm);
-
-	// listen for request to display preview of screensaver
-	chrome.runtime.onMessage.addListener(onMessage);
+	// listen for chrome messages
+	chrome.runtime.onMessage.addListener(_onChromeMessage);
 
 	// listen for clicks on context menus
-	chrome.contextMenus.onClicked.addListener(onMenuClicked);
+	chrome.contextMenus.onClicked.addListener(_onMenuClicked);
 
 	// listen for special keyboard commands
-	chrome.commands.onCommand.addListener(onKeyCommand);
-
+	chrome.commands.onCommand.addListener(_onKeyCommand);
 })();

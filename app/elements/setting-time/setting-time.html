@@ -1,11 +1,14 @@
 <!--
-@@license
--->
+  ~  Copyright (c) 2015-2017, Michael A. Updike All rights reserved.
+  ~  Licensed under the BSD-3-Clause
+  ~  https://opensource.org/licenses/BSD-3-Clause
+  ~  https://github.com/opus1269/photo-screen-saver/blob/master/LICENSE.md
+  -->
 <link rel="import" href="../../bower_components/polymer/polymer.html">
-<link rel="import" href="../../bower_components/paper-styles/paper-styles.html">
-
-<link rel="import" href="../../bower_components/iron-localstorage/iron-localstorage.html">
+<link rel="import" href="../../bower_components/paper-styles/typography.html">
+<link rel="import" href="../../bower_components/paper-styles/color.html">
 <link rel="import" href="../../bower_components/iron-flex-layout/iron-flex-layout-classes.html">
+<link rel="import" href="../../bower_components/iron-localstorage/iron-localstorage.html">
 
 <link rel="import" href="../../bower_components/paper-item/paper-item.html">
 <link rel="import" href="../../bower_components/paper-item/paper-item-body.html">
@@ -15,12 +18,13 @@
 
 <link rel="import" href="../../bower_components/paper-time-picker/paper-time-picker.html">
 
+<link rel="import" href="../localize-behavior/localize-behavior.html">
+
 <dom-module id="setting-time">
 	<template>
-		<style include="iron-flex iron-flex-alignment iron-flex-factors iron-positioning"></style>
+		<style include="iron-flex iron-flex-alignment"></style>
 		<style include="shared-styles"></style>
 		<style>
-
 			:host {
 				display: block;
 				position: relative;
@@ -39,110 +43,135 @@
 			:host([indent]) paper-item {
 				padding-left: 24px;
 			}
-
 		</style>
 
-		<div class="section-title setting-label" tabindex="-1" hidden$="[[!sectionTitle]]">{{sectionTitle}}</div>
-
-		<paper-item class="center horizontal layout" on-tap="_onTap">
-			<paper-item-body class="flex" two-line>
-				<div class="setting-label" hidden$="[[!mainLabel]]">{{mainLabel}}</div>
-				<div class="setting-label" secondary hidden$="[[!secondaryLabel]]">{{secondaryLabel}}</div>
-				<paper-ripple center></paper-ripple>
-			</paper-item-body>
-			<div class="setting-label" >[[timeLabel]]</div>
-		</paper-item>
-		<hr hidden$="[[noseparator]]" />
-		<iron-localstorage id="store" name="{{name}}" value="{{value}}" on-iron-localstorage-load-empty="_init"></iron-localstorage>
 
 		<paper-dialog id="dialog" modal class="paper-time-picker-dialog">
-			<paper-time-picker id="timePicker" hour="24" minute="0"></paper-time-picker>
+			<paper-time-picker id="timePicker" time="[[timeLabel]]"></paper-time-picker>
 			<div class="buttons">
-				<paper-button dialog-dismiss>Cancel</paper-button>
-				<paper-button dialog-confirm on-tap="_onTimeSelected">OK</paper-button>
+				<paper-button dialog-dismiss>{{localize('cancel')}}
+				</paper-button>
+				<paper-button dialog-confirm on-tap="_onTimeSelected">
+					{{localize('ok')}}
+				</paper-button>
 			</div>
 		</paper-dialog>
 
+		<div class="section-title setting-label" tabindex="-1" hidden$="[[!sectionTitle]]">
+			{{sectionTitle}}
+		</div>
+
+		<paper-item class="center horizontal layout" tabindex="-1" on-tap="_onTap">
+			<paper-item-body class="flex" two-line>
+				<div class="setting-label" hidden$="[[!mainLabel]]">
+					{{mainLabel}}
+				</div>
+				<div class="setting-label" secondary hidden$="[[!secondaryLabel]]">
+					{{secondaryLabel}}
+				</div>
+				<paper-ripple center></paper-ripple>
+			</paper-item-body>
+			<div class="setting-label" tabindex="0" disabled$="[[disabled]]">[[timeLabel]]</div>
+		</paper-item>
+		<hr hidden$="[[noseparator]]"/>
+		<iron-localstorage id="store" name="{{name}}" value="{{value}}" on-iron-localstorage-load-empty="_init"></iron-localstorage>
 	</template>
 </dom-module>
 
 <script>
-'use strict';
+	'use strict';
+	Polymer({
+		is: 'setting-time',
 
-Polymer({
-	is: 'setting-time',
+		behaviors: [
+			app.LocalizeBehavior,
+		],
 
-	hostAttributes: {
-		role: 'group',
-		tabIndex: -1
-	},
+		properties: {
+			name: {
+				type: String,
+				value: 'store',
+			},
 
-	properties: {
+			value: {
+				type: String,
+				value: '00:00',
+				observer: '_valueChanged',
+			},
 
-		name: {
-			type: String,
-			value: 'store'
+			timeLabel: {
+				type: String,
+				value: '12:00 AM',
+			},
+
+			mainLabel: {
+				type: String,
+				value: '',
+			},
+
+			secondaryLabel: {
+				type: String,
+				value: '',
+			},
+
+			sectionTitle: {
+				type: String,
+				value: '',
+			},
+
+			disabled: {
+				type: Boolean,
+				value: false,
+			},
+
+			noseparator: {
+				type: Boolean,
+				value: false,
+			},
 		},
 
-		value: {
-			type: String,
-			value: '00:00',
-			observer: '_valueChanged'
+		// initialize value if it is not in localstorage
+		_init: function() {
+			this.set('value', '00:00');
 		},
 
-		timeLabel: {
-			type: String,
-			value: 'unknown'
+		_valueChanged: function() {
+			this.set('timeLabel', this._formatTime(this.get('value')));
 		},
 
-		mainLabel: {
-			type: String,
-			value: ''
+		/**
+		 * Event: Show dialog on tap
+		 * @private
+		 */
+		_onTap: function() {
+			if (!this.disabled) {
+				this.$.dialog.open();
+			}
 		},
 
-		secondaryLabel: {
-			type: String,
-			value: ''
-		},
-
-		sectionTitle: {
-			type: String,
-			value: ''
-		},
-
-		noseparator: {
-			type: Boolean,
-			value: false
-		}
-
-	},
-
-	// initialize value if it is not in localstorage
-	_init: function() {
-		this.set('value','00:00');
-	},
-
-	_valueChanged: function() {
-		this.set('timeLabel', this._formatTime(this.get('value')));
-	},
-
-	_onTap: function() {
-		this.$.dialog.open();
-	},
-
+	/**
+	 * Event: Set time on tap of OK button
+	 * @private
+	 */
 	_onTimeSelected: function() {
-		var picker = this.$.timePicker;
-		this.set('value', ('0' + picker.hour).substr(-2) +
-		':' + ('0' + picker.minute).substr(-2));
+		const picker = this.$.timePicker;
+		const hour = ('0' + picker.hour).substr(-2);
+		const min = ('0' + picker.minute).substr(-2);
+		const value = `${hour}:${min}`;
+		this.set('value', value);
 	},
 
-	// '00:00' 24 hr time
+	/**
+	 * Get the time suitable for display
+	 * @param {string} timeString - format '00:00'
+	 * @returns {string} formatted time
+	 * @private
+	 */
 	_formatTime: function(timeString) {
-		var hour = parseInt(timeString.substr(0,2), 10);
-		var period = (hour % 24) < 12 ? 'AM' : 'PM';
+		let hour = parseInt(timeString.substr(0, 2), 10);
+		const period = (hour % 24) < 12 ? 'AM' : 'PM';
 		hour = hour % 12 || 12;
-		return hour + timeString.substr(2,3) + ' ' + period;
-	}
-
+		return hour + timeString.substr(2, 3) + ' ' + period;
+	},
 });
 </script>

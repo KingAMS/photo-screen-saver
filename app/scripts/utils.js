@@ -1,107 +1,104 @@
 /*
-@@license
-*/
-/*exported myUtils*/
-var myUtils = (function() {
+ *  Copyright (c) 2015-2017, Michael A. Updike All rights reserved.
+ *  Licensed under the BSD-3-Clause
+ *  https://opensource.org/licenses/BSD-3-Clause
+ *  https://github.com/opus1269/photo-screen-saver/blob/master/LICENSE.md
+ */
+window.app = window.app || {};
+app.Utils = (function() {
 	'use strict';
 
+	/**
+	 * Utility methods
+	 * @namespace app.Utils
+	 */
+
 	return {
+		/** Get the extension's name
+		 * @returns {string} Extension name
+		 * @memberOf app.Utils
+		 */
+		getExtensionName: function() {
+			return `chrome-extension://${chrome.runtime.id}`;
+		},
+
+		/**
+		 * Get the Extension version
+		 * @returns {string} Extension version
+		 * @memberOf app.Utils
+		 */
+		getVersion: function() {
+			const manifest = chrome.runtime.getManifest();
+			return manifest.version;
+		},
 
 		/**
 		 * Get the Chrome version
-		 *
-		 * @returns {Integer} Chrome major version
+		 * @see http://stackoverflow.com/a/4900484/4468645
+		 * @returns {int} Chrome major version
+		 * @memberOf app.Utils
 		 */
 		getChromeVersion: function() {
-			// http://stackoverflow.com/questions/4900436/detect-version-of-chrome-installed
-			var raw = navigator.userAgent.match(/Chrom(e|ium)\/([0-9]+)\./);
+			const raw = navigator.userAgent.match(/Chrom(e|ium)\/([0-9]+)\./);
 			return raw ? parseInt(raw[2], 10) : false;
 		},
 
 		/**
+		 * Get the full Chrome version
+		 * @see https://goo.gl/2ITMNO
+		 * @returns {string} Chrome version
+		 * @memberOf app.Utils
+		 */
+		getFullChromeVersion: function() {
+			const raw = navigator.userAgent;
+			return raw ? raw : 'Unknown';
+		},
+
+		/**
+		 * Get the i18n string
+		 * @param {string} messageName - key in message.json
+		 * @returns {string} internationalized string
+		 * @memberOf app.Utils
+		 */
+		localize: function(messageName) {
+			return chrome.i18n.getMessage(messageName);
+		},
+
+		/**
 		 * Determine if a String is null or whitespace only
-		 *
-		 * @param {String} str str to check
-		 * @returns {Boolean} true is str is whitespace (or null)
+		 * @param {?string} str - string to check
+		 * @returns {boolean} true is str is whitespace (or null)
+		 * @memberOf app.Utils
 		 */
 		isWhiteSpace: function(str) {
 			return (!str || str.length === 0 || /^\s*$/.test(str));
 		},
 
 		/**
-		 * Get integer value from localStorage
-		 *
-		 * @param {String} key key to get value for
-		 * @returns {Integer} value as integer
-		 *
+		 * Get the idle time in seconds
+		 * @returns {int} idle time in seconds
+		 * @memberOf app.Utils
 		 */
-		getInt: function(key) {
-			return parseInt(localStorage.getItem(key), 10);
+		getIdleSeconds: function() {
+			const idle = app.Storage.get('idleTime');
+			return idle.base * 60;
 		},
 
 		/**
-		 * Get boolean value from localStorage
-		 *
-		 * @param {String} key key to get value for
-		 * @returns {Boolean} value as boolean
-		 *
+		 * true if we are MS windows
+		 * @returns {boolean} true if MS windows
+		 * @memberOf app.Utils
 		 */
-		getBool: function(key) {
-			return JSON.parse(localStorage.getItem(key));
-		},
-
-		/**
-		 * Get JSON value from localStorage
-		 *
-		 * @param {String} key key to get value for
-		 * @returns {JSON} value as JSON Object
-		 *
-		 */
-		getJSON: function(key) {
-			return JSON.parse(localStorage.getItem(key));
-		},
-
-		/**
-		 * Save a value to localStorage only if there is enough room
-		 *
-		 * @param {String} key localStorage Key
-		 * @param {String} value JSON stringified value to save
-		 * @param {String} keyBool optional key to a boolean value
-		 *                 that is true if the primary key has non-empty value
-		 * @returns {Boolean} true if value was set successfully
-		 */
-		localStorageSafeSet: function(key, value, keyBool) {
-			var ret = true;
-			var oldValue = myUtils.getJSON(key);
-			try {
-				localStorage.setItem(key, value);
-			} catch (e) {
-				ret = false;
-				if (oldValue) {
-					// revert to old value
-					localStorage.setItem(key, JSON.stringify(oldValue));
-				}
-				if (keyBool) {
-					// revert to old value
-					if (oldValue && oldValue.length) {
-						localStorage.setItem(keyBool, 'true');
-					} else {
-						localStorage.setItem(keyBool, 'false');
-					}
-				}
-				// notify listeners
-				chrome.runtime.sendMessage({message: 'storageExceeded', name: keyBool});
-			}
-
-			return ret;
+		isWin: function() {
+			return app.Storage.get('os') === 'win';
 		},
 
 		/**
 		 * Returns a random integer between min and max inclusive
-		 *
-		 * @param {Integer} min
-		 * @param {Integer} max
-		 * @returns {Integer} random int
+		 * @param {int} min - min value
+		 * @param {int} max - max value
+		 * @returns {int} random int
+		 * @memberOf app.Utils
 		 */
 		getRandomInt: function(min, max) {
 			return Math.floor(Math.random() * (max - min + 1)) + min;
@@ -109,51 +106,38 @@ var myUtils = (function() {
 
 		/**
 		 * Randomly sort an Array in place
-		 *
-		 * @param {Array} array array to sort
+		 * Fisher-Yates shuffle algorithm.
+		 * @param {Array} array - Array to sort
+		 * @memberOf app.Utils
 		 */
 		shuffleArray: function(array) {
-			// Fisher-Yates shuffle algorithm.
-			for (var i = array.length - 1; i > 0; i--) {
-				var j = Math.floor(Math.random() * (i + 1));
-				var temp = array[i];
+			for (let i = array.length - 1; i > 0; i--) {
+				const j = Math.floor(Math.random() * (i + 1));
+				const temp = array[i];
 				array[i] = array[j];
 				array[j] = temp;
 			}
 		},
 
 		/**
-		 * Get a globally unique identifier
-		 *
-		 * @returns {String} a GUID
-		 */
-		getGuid: function() {
-			// http://stackoverflow.com/questions/105034/create-guid-uuid-in-javascript
-			function s4() {
-				return Math.floor((1 + Math.random()) * 0x10000)
-					.toString(16)
-					.substring(1);
-			}
-			return s4() + s4() + '-' + s4() + '-' + s4() + '-' +
-				s4() + '-' + s4() + s4() + s4();
-		},
-
-		/**
 		 * Add an image object to an existing Array
-		 *
-		 * @param {Array} images Array of image objects
-		 * @param {String} url The url to the photo
-		 * @param {String} author The photographer
-		 * @param {Number} asp The aspect ratio of the photo
-		 * @param {Object} ex Optional, additional information about the photo
+		 * @param {Array} images - Array of image objects
+		 * @param {string} url - The url to the photo
+		 * @param {string} author - The photographer
+		 * @param {number} asp - The aspect ratio of the photo
+		 * @param {Object} [ex] - Additional information about the photo
+		 * @memberOf app.Utils
 		 */
 		addImage: function(images, url, author, asp, ex) {
-			var image = {url: url, author: author, asp: asp.toPrecision(3)};
+			const image = {
+				url: url,
+				author: author,
+				asp: asp.toPrecision(3),
+			};
 			if (ex) {
 				image.ex = ex;
 			}
 			images.push(image);
-		}
-
+		},
 	};
 })();

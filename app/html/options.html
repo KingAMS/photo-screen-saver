@@ -1,7 +1,11 @@
-﻿<!doctype html>
-
+﻿<!--
+  ~  Copyright (c) 2015-2017, Michael A. Updike All rights reserved.
+  ~  Licensed under the BSD-3-Clause
+  ~  https://opensource.org/licenses/BSD-3-Clause
+  ~  https://github.com/opus1269/photo-screen-saver/blob/master/LICENSE.md
+  -->
+<!doctype html>
 <html>
-
 <head>
 	<meta charset="utf-8">
 	<meta name="description" content="">
@@ -19,11 +23,9 @@
 
 	<!-- For shared styles, shared-styles.html import in elements.html -->
 	<style is="custom-style" include="shared-styles"></style>
-
 </head>
 
 <body unresolved class="fullbleed layout vertical">
-
 	<template is="dom-bind" id="t">
 
 		<paper-drawer-panel id="paperDrawerPanel" responsive-width="800px" drawer-width="350px">
@@ -32,11 +34,12 @@
 				<paper-scroll-header-panel>
 					<!-- Drawer Toolbar -->
 					<paper-toolbar id="drawerToolbar">
-						<span class="paper-font-title">Menu</span>
+						<span class="paper-font-title">{{computeMenu()}}</span>
 					</paper-toolbar>
 					<!-- Drawer Content -->
 					<paper-menu class="list" id="mainMenu" attr-for-selected="id" selected="[[route]]">
 						<template is="dom-repeat" items="[[pages]]">
+							<hr hidden$="[[!item.divider]]"/>
 							<paper-item id="[[item.route]]" class="center horizontal layout" on-click="onDataRouteClick">
 								<iron-icon icon="[[item.icon]]"></iron-icon>
 								<span>[[item.label]]</span>
@@ -51,11 +54,13 @@
 				<!-- Main Toolbar -->
 				<paper-material class="paper-header" elevation="2">
 					<paper-toolbar id="mainToolbar">
-						<paper-icon-button id="paperToggle" icon="menu" paper-drawer-toggle></paper-icon-button>
+						<paper-icon-button id="paperToggle" icon="myicons:menu" paper-drawer-toggle></paper-icon-button>
 						<span class="flex"></span>
 						<!-- Application name -->
 						<div class="middle middle-container center horizontal layout">
-							<div class="paper-font-headline app-name">Photo Screen Saver</div>
+							<div class="paper-font-headline app-name">
+								{{computeTitle()}}
+							</div>
 						</div>
 					</paper-toolbar>
 				</paper-material>
@@ -85,11 +90,8 @@
 						<neon-animatable data-route="page-google-photos">
 							<section id="googlePhotosInsertion"></section>
 						</neon-animatable>
-						<neon-animatable data-route="page-faq">
-							<section id="faqInsertion"></section>
-						</neon-animatable>
-						<neon-animatable data-route="page-info">
-							<section id="infoInsertion"></section>
+						<neon-animatable data-route="page-help">
+							<section id="helpInsertion"></section>
 						</neon-animatable>
 					</neon-animated-pages>
 				</div>
@@ -102,6 +104,7 @@
 	<!-- endbuild:replace -->
 
 	<script src="../scripts/utils.js"></script>
+	<script src="../scripts/storage.js"></script>
 	<script src="../scripts/options.js"></script>
 	<script src="../scripts/google_photos.js"></script>
 	<script src="../scripts/photo_sources.js"></script>

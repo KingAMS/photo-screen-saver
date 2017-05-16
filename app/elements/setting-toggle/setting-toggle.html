@@ -1,11 +1,15 @@
 <!--
-@@license
--->
+  ~  Copyright (c) 2015-2017, Michael A. Updike All rights reserved.
+  ~  Licensed under the BSD-3-Clause
+  ~  https://opensource.org/licenses/BSD-3-Clause
+  ~  https://github.com/opus1269/photo-screen-saver/blob/master/LICENSE.md
+  -->
 <link rel="import" href="../../bower_components/polymer/polymer.html">
-<link rel="import" href="../../bower_components/paper-styles/paper-styles.html">
-
-<link rel="import" href="../../bower_components/iron-localstorage/iron-localstorage.html">
+<link rel="import" href="../../bower_components/paper-styles/typography.html">
+<link rel="import" href="../../bower_components/paper-styles/color.html">
 <link rel="import" href="../../bower_components/iron-flex-layout/iron-flex-layout-classes.html">
+<link rel="import" href="../../bower_components/iron-localstorage/iron-localstorage.html">
+
 <link rel="import" href="../../bower_components/iron-label/iron-label.html">
 
 <link rel="import" href="../../bower_components/paper-item/paper-item.html">
@@ -15,10 +19,9 @@
 
 <dom-module id="setting-toggle">
 	<template>
-		<style include="iron-flex iron-flex-alignment iron-flex-factors iron-positioning"></style>
+		<style include="iron-flex iron-flex-alignment"></style>
 		<style include="shared-styles"></style>
 		<style>
-
 			:host {
 				display: block;
 				position: relative;
@@ -37,16 +40,21 @@
 			:host([indent]) paper-item {
 				padding-left: 24px;
 			}
-
 		</style>
 
-		<div class="section-title setting-label" tabindex="-1" hidden$="[[!sectionTitle]]">{{sectionTitle}}</div>
+		<div class="section-title setting-label" tabindex="-1" hidden$="[[!sectionTitle]]">
+			{{sectionTitle}}
+		</div>
 
 		<iron-label for="toggle">
 			<paper-item class="center horizontal layout" tabindex="-1">
 				<paper-item-body class="flex" two-line>
-					<div class="setting-label" hidden$="[[!mainLabel]]">{{mainLabel}}</div>
-					<div class="setting-label" secondary hidden$="[[!secondaryLabel]]">{{secondaryLabel}}</div>
+					<div class="setting-label" hidden$="[[!mainLabel]]">
+						{{mainLabel}}
+					</div>
+					<div class="setting-label" secondary hidden$="[[!secondaryLabel]]">
+						{{secondaryLabel}}
+					</div>
 					<paper-ripple center></paper-ripple>
 				</paper-item-body>
 				<paper-toggle-button
@@ -55,80 +63,69 @@
 				</paper-toggle-button>
 			</paper-item>
 		</iron-label>
-		<hr hidden$="[[noseparator]]" />
+		<hr hidden$="[[noseparator]]"/>
 		<iron-localstorage name="{{name}}" value="{{checked}}" on-iron-localstorage-load-empty="_init"></iron-localstorage>
 
 	</template>
 </dom-module>
 
 <script>
-'use strict';
+	'use strict';
+	Polymer({
+		is: 'setting-toggle',
 
-Polymer({
-	is: 'setting-toggle',
+		properties: {
+			name: {
+				type: String,
+				value: 'store',
+			},
 
-	hostAttributes: {
-		role: 'group',
-		tabIndex: -1
-	},
+			checked: {
+				type: Boolean,
+				value: false,
+				notify: true,
+			},
 
-	properties: {
+			mainLabel: {
+				type: String,
+				value: '',
+			},
 
-		name: {
-			type: String,
-			value: 'store'
+			secondaryLabel: {
+				type: String,
+				value: '',
+			},
+
+			sectionTitle: {
+				type: String,
+				value: '',
+			},
+
+			disabled: {
+				type: Boolean,
+				value: false,
+			},
+
+			noseparator: {
+				type: Boolean,
+				value: false,
+			},
 		},
 
-		checked: {
-			type: Boolean,
-			value: false,
-			notify: true
+		/**
+		 * Set the checked state of the toggle
+		 * @param {boolean} checked - checked state
+		 */
+		setChecked: function(checked) {
+			this.set('checked', checked);
 		},
 
-		mainLabel: {
-			type: String,
-			value: ''
+		/**
+		 * Initialize value if it is not in localStorage
+		 * @private
+		 */
+		_init: function() {
+			this.set('checked', 'false');
 		},
-
-		secondaryLabel: {
-			type: String,
-			value: ''
-		},
-
-		sectionTitle: {
-			type: String,
-			value: ''
-		},
-
-		disabled: {
-			type: Boolean,
-			value: false
-		},
-
-		noseparator: {
-			type: Boolean,
-			value: false
-		}
-
-	},
-
-	/**
-	 * Set the checked state of the toggle
-	 *
-	 * {boolean} checked checked state
-	 */
-	setChecked: function(checked) {
-		this.checked = checked;
-	},
-
-	/**
-	 * Initialize value if it is not in localStorage
-	 *
-	 * @private
-	 */
-	_init: function() {
-		this.set('checked', 'false');
-	}
-
-});
+	});
 </script>

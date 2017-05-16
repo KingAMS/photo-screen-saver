@@ -1,0 +1,413 @@
+{
+  "chrome_extension_name": {
+    "message": "Photo Screen saver"
+  },
+  "chrome_extension_description": {
+    "message": "Uno screensaver con più fonti fotografiche, incluse le tue foto di Google."
+  },
+  "browser_action_title": {
+    "message": "Photo Screen Saver - fai clic per le opzioni"
+  },
+  "toggle_enabled": {
+    "message": "Attivare lo stato abilitato"
+  },
+  "screensaver": {
+    "message": "Salvaschermo"
+  },
+  "on": {
+    "message": "È acceso"
+  },
+  "off": {
+    "message": "è spento"
+  },
+  "disable": {
+    "message": "disattivare"
+  },
+  "enable": {
+    "message": "Abilitare"
+  },
+  "help": {
+    "message": "Aiuto"
+  },
+  "no": {
+    "message": "No"
+  },
+  "ok": {
+    "message": "ok",
+    "description": "All Caps"
+  },
+  "cancel": {
+    "message": "ANNULLA",
+    "description": "All Caps"
+  },
+  "polymer": {
+    "message": "POLIMERO",
+    "description": "All Caps"
+  },
+  "github": {
+    "message": "VEDI SUL GITHUB",
+    "description": "All Caps"
+  },
+  "w3": {
+    "message": "W3Schools",
+    "description": "All Caps"
+  },
+  "mdn": {
+    "message": "MDN",
+    "description": "All Caps"
+  },
+  "chromecast": {
+    "message": "CHROMECAST",
+    "description": "All Caps"
+  },
+  "picasa": {
+    "message": "PICASA",
+    "description": "All Caps"
+  },
+  "material": {
+    "message": "PROGETTAZIONE MATERIALE",
+    "description": "All Caps"
+  },
+  "chrome_ext": {
+    "message": "ESTENSIONE DEL CROMO",
+    "description": "All Caps"
+  },
+  "note": {
+    "message": "Nota:"
+  },
+  "photo": {
+    "message": "foto"
+  },
+  "photos": {
+    "message": "fotografie"
+  },
+  "seconds": {
+    "message": "secondi"
+  },
+  "minutes": {
+    "message": "minuti"
+  },
+  "hours": {
+    "message": "ore"
+  },
+  "days": {
+    "message": "giorni"
+  },
+  "off_abbrev": {
+    "message": "OFF",
+    "description": "All Caps. max 3 letter abbreviation for OFF"
+  },
+  "sleep_abbrev": {
+    "message": "SLP",
+    "description": "All Caps. max 3 letter abbreviation for SLEEP"
+  },
+  "power_abbrev": {
+    "message": "PWR",
+    "description": "All Caps. max 3 letter abbreviation for POWER"
+  },
+  "menu": {
+    "message": "Menu"
+  },
+  "menu_settings": {
+    "message": "impostazioni"
+  },
+  "menu_google": {
+    "message": "Seleziona gli album di Google Foto"
+  },
+  "menu_preview": {
+    "message": "Anteprima screensaver"
+  },
+  "menu_help": {
+    "message": "Aiuto e feedback"
+  },
+  "menu_support": {
+    "message": "Richiedi supporto"
+  },
+  "menu_rate": {
+    "message": "Valuta l'estensione"
+  },
+  "menu_pushy": {
+    "message": "Prova l'estensione Clipboard Pushy"
+  },
+  "menu_letterbox": {
+    "message": "letterbox"
+  },
+  "menu_zoom": {
+    "message": "Zoom (coltura maggio)"
+  },
+  "menu_frame": {
+    "message": "Telaio"
+  },
+  "menu_full": {
+    "message": "Pieno (può distorcere)"
+  },
+  "menu_random": {
+    "message": "Casuale"
+  },
+  "menu_scale_up": {
+    "message": "Scalate"
+  },
+  "menu_fade": {
+    "message": "dissolvenza"
+  },
+  "menu_slide_from_right": {
+    "message": "Scorrere da destra"
+  },
+  "menu_slide_down": {
+    "message": "Scorrere verso il basso"
+  },
+  "menu_spin_up": {
+    "message": "Accelerare"
+  },
+  "menu_slide_up": {
+    "message": "Scorrere verso l'alto"
+  },
+  "menu_slide_from_bottom": {
+    "message": "Scivola dal basso"
+  },
+  "menu_slide_right": {
+    "message": "Scorrere a destra"
+  },
+  "menu_12_hour": {
+    "message": "12 ore"
+  },
+  "menu_24_hour": {
+    "message": "24 ore"
+  },
+  "tooltip_select": {
+    "message": "Seleziona tutto"
+  },
+  "tooltip_deselect": {
+    "message": "Deselezionare tutto"
+  },
+  "tooltip_restore": {
+    "message": "Ripristina le impostazioni di default"
+  },
+  "tooltip_refresh": {
+    "message": "Aggiorna la lista"
+  },
+  "tooltip_keep_awake": {
+    "message": "Le funzioni Keep awake sono disponibili anche se lo screensaver è disabilitato, in modo da poter utilizzare l'applicazione come pianificatore di alimentazione generale. L'icona visualizza 'PWR' in questo stato."
+  },
+  "tooltip_settings_toggle": {
+    "message": "Abilita / disabilita lo screensaver"
+  },
+  "tooltip_google_toggle": {
+    "message": "Abilita / disabilita l'utilizzo degli album"
+  },
+  "setting_idle_time": {
+    "message": "Tempo di attesa"
+  },
+  "setting_transition_time": {
+    "message": "Tempo di transizione foto"
+  },
+  "setting_photo_sizing": {
+    "message": "Modalità di visualizzazione foto"
+  },
+  "setting_photo_transition": {
+    "message": "Metodo di transizione foto"
+  },
+  "setting_show_time": {
+    "message": "Orario dello spettacolo"
+  },
+  "setting_shuffle": {
+    "message": "Rendi casuale"
+  },
+  "setting_shuffle_desc": {
+    "message": "Presentare le foto in ordine casuale"
+  },
+  "setting_skip": {
+    "message": "Salta le foto estreme di rapporto di formato"
+  },
+  "setting_skip_desc": {
+    "message": "Non visualizzare alcune foto in modalità Zoom e Full"
+  },
+  "setting_photog": {
+    "message": "Mostra l'autore per le foto che possiedi"
+  },
+  "setting_photog_desc": {
+    "message": "Nota: mostra sempre in modalità Frame"
+  },
+  "setting_bg": {
+    "message": "sfondo"
+  },
+  "setting_bg_desc": {
+    "message": "Impostare l'immagine di sfondo dello screensaver"
+  },
+  "setting_bg_dialog_title": {
+    "message": "Seleziona l'immagine di sfondo"
+  },
+  "setting_all_displays": {
+    "message": "Tutti i display"
+  },
+  "setting_all_displays_desc": {
+    "message": "Mostra screensaver su tutti i display connessi"
+  },
+  "setting_full_screen": {
+    "message": "Non mostrare le finestre Chrome a schermo intero"
+  },
+  "setting_full_screen_desc": {
+    "message": "Utile se si guarda i video"
+  },
+  "setting_keep_awake": {
+    "message": "Tieniti sveglio"
+  },
+  "setting_keep_awake_desc": {
+    "message": "Evitare la visualizzazione dal sonno (sempre attiva se i tempi di avvio e di arresto sono uguali)"
+  },
+  "setting_start_time": {
+    "message": "Tempo per iniziare"
+  },
+  "setting_start_time_desc": {
+    "message": "Consenti visualizzazione dello screen saver, a partire da questo momento"
+  },
+  "setting_stop_time": {
+    "message": "Tempo di fermarsi"
+  },
+  "setting_stop_time_desc": {
+    "message": "Disattiva la visualizzazione dello screensaver dopo questo tempo"
+  },
+  "setting_suspend": {
+    "message": "Lasciare sospendere il sistema"
+  },
+  "setting_suspend_desc": {
+    "message": "Il computer potrebbe dormire durante il tempo inattivo"
+  },
+  "setting_chromecast": {
+    "message": "Chromecast"
+  },
+  "setting_chromecast_desc": {
+    "message": "Alcune foto di sfondo del dispositivo Chromecast"
+  },
+  "setting_500editors": {
+    "message": "500px - scelta dei redattori"
+  },
+  "setting_500editors_desc": {
+    "message": "Scelta foto da 500px"
+  },
+  "setting_500popular": {
+    "message": "500px - popolare"
+  },
+  "setting_500popular_desc": {
+    "message": "Foto popolari da 500px"
+  },
+  "setting_500yest": {
+    "message": "500px - fresco"
+  },
+  "setting_500yest_desc": {
+    "message": "Le foto recenti della 500px, aggiornate quotidianamente"
+  },
+  "setting_flickr_int": {
+    "message": "Flickr - interessante"
+  },
+  "setting_flickr_int_desc": {
+    "message": "Foto interessanti del Flickr, aggiornate quotidianamente"
+  },
+  "setting_reddit_space": {
+    "message": "Reddit - spazio"
+  },
+  "setting_reddit_space_desc": {
+    "message": "Prime foto celestiali da reddit, aggiornate quotidianamente"
+  },
+  "setting_reddit_earth": {
+    "message": "Reddit - terra"
+  },
+  "setting_reddit_earth_desc": {
+    "message": "Principalmente foto paesaggistiche da reddit, aggiornate quotidianamente"
+  },
+  "setting_reddit_animal": {
+    "message": "Reddit - animali"
+  },
+  "setting_reddit_animal_desc": {
+    "message": "Foto animate da reddit, aggiornate quotidianamente"
+  },
+  "setting_mine": {
+    "message": "Sviluppatore di estensione"
+  },
+  "setting_mine_desc": {
+    "message": "Foto del tizio che ha scritto questo"
+  },
+  "setting_click_to_view": {
+    "message": "Fai clic sul mouse per visualizzare il sito web per le foto Flickr, 500px e reddit"
+  },
+  "setting_flickr_api": {
+    "message": "Questo prodotto utilizza l'API Flickr ma non è approvato o certificato da Flickr"
+  },
+  "tab_slideshow": {
+    "message": "SLIDE SHOW CONTROLS",
+    "description": "All Caps"
+  },
+  "tab_display": {
+    "message": "CONTROLLI DISPLAY",
+    "description": "All Caps"
+  },
+  "tab_sources": {
+    "message": "FONTI DI FOTO",
+    "description": "All Caps"
+  },
+  "google_title": {
+    "message": "Album di foto di Google"
+  },
+  "google_shared_albums_note": {
+    "message": "Nota: Gli album condivisi potrebbero non essere disponibili. Vedere le FAQ per ulteriori informazioni."
+  },
+  "google_loading": {
+    "message": "Caricamento di album"
+  },
+  "help_title": {
+    "message": "Aiuto e risposte"
+  },
+  "help_section_feedback": {
+    "message": "Feedback (solo inglese, per favore)"
+  },
+  "help_question": {
+    "message": "Fai una domanda"
+  },
+  "help_bug": {
+    "message": "Segnala un errore"
+  },
+  "help_feature": {
+    "message": "Funzione richiesta"
+  },
+  "help_feedback": {
+    "message": "Fornire un feedback"
+  },
+  "help_issue": {
+    "message": "Invia il problema di GitHub (richiede account)"
+  },
+  "help_documentation": {
+    "message": "Documentazione"
+  },
+  "help_faq": {
+    "message": "Domande frequenti"
+  },
+  "help_translations": {
+    "message": "Offrire assistenza con le traduzioni"
+  },
+  "help_release_notes": {
+    "message": "Note di rilascio"
+  },
+  "help_licenses": {
+    "message": "Licenze open source"
+  },
+  "help_source_code": {
+    "message": "Codice sorgente"
+  },
+  "err_request_failed": {
+    "message": "Richiesta fallita. Seleziona Aggiorna per riprovare."
+  },
+  "err_storage_title": {
+    "message": "Limiti di stoccaggio superati"
+  },
+  "err_storage_desc": {
+    "message": "Deseleziona altre fonti fotografiche e riprova."
+  },
+  "time_format": {
+    "message": "12",
+    "description": "Set to 12 for AM/PM format or 24"
+  },
+  "translationInfo": {
+    "message": "Google Translate API",
+    "description": "Add your name and contact info, if you want"
+  }
+}

@@ -1,12 +1,17 @@
 node_modules
-dev
-dist
-app/bower_components
+/dev
+/dist
 bower_components
 .tmp
 *.db
-*- Copy*
+*.lock
 
+# jekyll
+_site/
+.sass-cache/
+.jekyll-metadata
+
+# IntelliJ
 *.iml
 .gradle
 /local.properties
@@ -19,4 +24,5 @@ bower_components
 
 # Windows clutter
 Thumbs.db
+*- Copy*
 

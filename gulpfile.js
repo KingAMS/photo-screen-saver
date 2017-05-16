@@ -1,235 +1,263 @@
 'use strict';
 
 // paths and files
-var base = {
+const base = {
+	app: 'photo-screen-saver',
 	src: 'app/',
-	dist: 'dist/app/',
-	dev: 'dev/app/',
-	store: 'store/'
+	dist: 'dist/',
+	dev: 'dev/',
+	store: 'store/',
+	docs: 'docs/',
 };
-var path = {
-	scripts: {
-		src: base.src + 'scripts/',
-		dist: base.dist + 'scripts/',
-		dev: base.dev + 'scripts/'
-	},
-	html: {
-		src: base.src + 'html/',
-		dist: base.dist + 'html/',
-		dev: base.dev + 'html/'
-	},
-	elements: {
-		src: base.src + 'elements/',
-		dist: base.dist + 'elements/',
-		dev: base.dev + 'elements/'
-	},
-	styles: {
-		src: base.src + 'styles/',
-		dist: base.dist + 'styles/',
-		dev: base.dev + 'styles/'
-	},
-	images: {
-		src: base.src + 'images/',
-		dist: base.dist + 'images/',
-		dev: base.dev + 'images/'
-	},
-	assets: {
-		src: base.src + 'assets/',
-		dist: base.dist + 'assets/',
-		dev: base.dev + 'assets/'
-	},
-	lib: {
-		src: base.src + 'lib/',
-		dist: base.dist + 'lib/',
-		dev: base.dev + 'lib/'
-	},
-	bower: {
-		src: base.src + 'bower_components/',
-		dist: base.dist + 'bower_components/',
-		dev: base.dev + 'bower_components/'
-	}
+const path = {
+	scripts: base.src + 'scripts/',
+	html: base.src + 'html/',
+	elements: base.src + 'elements/',
+	styles: base.src + 'styles/',
+	images: base.src + 'images/',
+	assets: base.src + 'assets/',
+	lib: base.src + 'lib/',
+	locales: base.src + '_locales/',
+	bower: base.src + 'bower_components/',
+};
+const files = {
+	manifest: base.src + 'manifest.json',
+	scripts: path.scripts + '*.js',
+	html: path.html + '*.html',
+	styles: path.styles + '**/*.*',
+	elements: path.elements + '**/*.html',
+	images: path.images + '*.*',
+	assets: path.assets + '*.*',
+	lib: path.lib + '**/*.*',
+	locales: path.locales + '**/*.*',
+	bower: [path.bower + '**/*', '!' + path.bower + '**/test/*',
+		'!' + path.bower + '**/demo/*'],
 };
 
-var files = {
-	manifest: base.src + 'manifest.json',
-	scripts: path.scripts.src + '*.*',
-	html: path.html.src + '*.*',
-	styles: path.styles.src + '**/*.*',
-	elements: path.elements.src + '**/*.*',
-	images: path.images.src + '*.*',
-	assets: path.assets.src + '*.*',
-	lib: path.lib.src + '*.*',
-	bower: [path.bower.src + '**/*', '!' + path.bower.src + '**/test/*', '!' + path.bower.src + '**/demo/*']
+// command options
+const minifierOpts = {
+	preserveComments: 'license',
+};
+const crisperOpts = {
+	scriptInHead: false,
+};
+const vulcanizeOpts = {
+	stripComments: true,
+	inlineCss: true,
+	inlineScripts: true,
 };
 
 // flag for production release build
-var isProd = false;
+let isProd = false;
 // flag to keep key in production build for testing purposes
-var isProdTest = false;
+let isProdTest = false;
 
-var gulp = require('gulp');
-var del = require('del');
-var runSequence = require('run-sequence');
-var gutil = require('gulp-util');
+const gulp = require('gulp');
+const del = require('del');
+const runSequence = require('run-sequence');
+const gutil = require('gulp-util');
+// for ECMA6
+const uglifyjs = require('uglify-js-harmony');
+const minifier = require('gulp-uglify/minifier');
 
 // load the rest
-var plugins = require('gulp-load-plugins')({
+const plugins = require('gulp-load-plugins')({
 	pattern: ['gulp-*', 'gulp.*'],
-	replaceString: /\bgulp[\-.]/
+	replaceString: /\bgulp[\-.]/,
 });
 
-// print which file changed
+/**
+ * regex to remove path from filename
+ * @const
+ * @type {RegExp}
+ */
+const regex = new RegExp('^(.*?)' + base.app + '\\\\', 'g');
+
+/**
+ * Output filenames that changed
+ * @param {Event} event - change event
+ */
 function onChange(event) {
-	gutil.log('File', gutil.colors.cyan(event.path.replace(/.*(?=app)/i, '')), 'was', gutil.colors.magenta(event.type));
+	gutil.log('File', gutil.colors.cyan(event.path.replace(regex, '')),
+		'was', gutil.colors.magenta(event.type));
 }
-
-// clean all output directories
-gulp.task('clean-all', function() {
-	return del(['dist', 'dev']);
-});
-
-// clean output directories
-gulp.task('clean', function() {
-	return del(isProd ? 'dist' : 'dev');
-});
-
-// manifest.json
-gulp.task('manifest', function() {
-	return gulp.src(base.src + 'manifest.json')
-	.pipe(plugins.changed(isProd ? base.dist : base.dev))
-	.pipe((isProd && !isProdTest) ? plugins.stripLine('"key":') : gutil.noop())
-	.pipe(isProd ? gulp.dest(base.dist) : gulp.dest(base.dev));
-});
-
-// prep bower files
-gulp.task('bower', function() {
-	return gulp.src(files.bower)
-	.pipe(plugins.if('*.html', plugins.crisper({scriptInHead: false})))
-	.pipe(gulp.dest(path.bower.dev));
-});
-
-// Lint JavaScript
-gulp.task('lintjs', function() {
-	return gulp.src([files.scripts, files.elements, 'gulpfile.js'])
-	.pipe(plugins.changed(path.scripts.dev))
-	.pipe(plugins.changed(path.elements.dev))
-	.pipe(plugins.changed(base.dev))
-	.pipe(plugins.if('*.html', plugins.htmlExtract())) // jscs needs extract
-	.pipe(plugins.jshint())
-	.pipe(plugins.jscs())
-	.pipe(plugins.jscsStylish.combineWithHintResults())
-	.pipe(plugins.jshint.reporter('jshint-stylish'))
-	.pipe(plugins.jshint.reporter('fail'));
-});
-
-// scripts - lint first
-gulp.task('scripts', ['lintjs'], function() {
-	return gulp.src(files.scripts)
-	.pipe(plugins.changed(isProd ? path.scripts.dist : path.scripts.dev))
-	.pipe(isProd ? plugins.uglify() : gutil.noop())
-	.pipe(isProd ? gulp.dest(path.scripts.dist) : gulp.dest(path.scripts.dev));
-});
-
-// html
-gulp.task('html', function() {
-	return gulp.src(files.html)
-	.pipe(plugins.changed(isProd ? path.html.dist : path.html.dev))
-	.pipe((isProd && !isProdTest) ? gutil.noop() : plugins.replace('<!--@@build:replace -->', '<!--'))
-	.pipe(isProd ? plugins.minifyHtml() : gutil.noop())
-	.pipe(isProd ? gulp.dest(path.html.dist) : gulp.dest(path.html.dev));
-});
-
-// elements - lint first
-gulp.task('elements', ['lintjs'], function() {
-	return gulp.src(files.elements)
-	.pipe(plugins.changed(path.elements.dev))
-	.pipe(plugins.if('*.html', plugins.crisper({scriptInHead: false})))
-	.pipe(gulp.dest(path.elements.dev));
-});
-
-// styles
-gulp.task('styles', function() {
-	return gulp.src(files.styles)
-	.pipe(plugins.changed(isProd ? path.styles.dist : path.styles.dev))
-	.pipe(plugins.if('*.css', isProd ? plugins.minifyCss() : gutil.noop()))
-	.pipe(isProd ? gulp.dest(path.styles.dist) : gulp.dest(path.styles.dev));
-});
-
-// images
-gulp.task('images', function() {
-	return gulp.src(files.images)
-	.pipe(plugins.changed(isProd ? path.images.dist : path.images.dev))
-	.pipe(plugins.imagemin({progressive: true, interlaced: true}))
-	.pipe(isProd ? gulp.dest(path.images.dist) : gulp.dest(path.images.dev));
-});
-
-// assets
-gulp.task('assets', function() {
-	return gulp.src(files.assets)
-	.pipe(plugins.changed(isProd ? path.assets.dist : path.assets.dev))
-	.pipe(isProd ? gulp.dest(path.assets.dist) : gulp.dest(path.assets.dev));
-});
-
-// lib
-gulp.task('lib', function() {
-	return gulp.src(files.lib)
-	.pipe(plugins.changed(isProd ? path.lib.dist : path.lib.dev))
-	.pipe(isProd ? gulp.dest(path.lib.dist) : gulp.dest(path.lib.dev));
-});
-
-// vulcanize for production
-gulp.task('vulcanize', function() {
-	return gulp.src(path.elements.src + 'elements.html')
-	.pipe(plugins.vulcanize({stripComments: true, inlineCss: true, inlineScripts: true}))
-	.pipe(plugins.crisper({scriptInHead: false}))
-	.pipe(plugins.if('*.html', plugins.minifyInline({css: false})))
-	.pipe(plugins.if('*.js', plugins.uglify()))
-	.pipe(gulp.dest(path.elements.dist));
-});
-
-// compress for the Chrome Web Store
-gulp.task('zip', function() {
-	return gulp.src(base.dist + '**')
-	.pipe(!isProdTest ? plugins.zip('store.zip') : plugins.zip('store-test.zip'))
-	.pipe(!isProdTest ? gulp.dest(base.store) : gulp.dest('dist'));
-});
-
-// track changes in development
-gulp.task('watch', ['manifest', 'scripts', 'html', 'styles',	'elements', 'images', 'assets', 'lib'], function() {
-
-	gulp.watch(files.manifest, ['manifest']).on('change', onChange);
-	gulp.watch([files.scripts, 'gulpfile.js'], ['scripts']).on('change', onChange);
-	gulp.watch(files.html, ['html']).on('change', onChange);
-	gulp.watch(files.styles, ['styles']).on('change', onChange);
-	gulp.watch(files.elements, ['elements']).on('change', onChange);
-	gulp.watch(files.images, ['images']).on('change', onChange);
-	gulp.watch(files.assets, ['assets']).on('change', onChange);
-	gulp.watch(files.lib, ['lib']).on('change', onChange);
-
-});
 
 // Default - watch for changes in development
 gulp.task('default', ['watch']);
 
+// track changes in development
+gulp.task('watch', ['manifest', 'scripts', 'html', 'styles', 'elements',
+		'images', 'assets', 'lib', 'locales'],
+	function() {
+		gulp.watch(files.manifest, ['manifest']).on('change', onChange);
+		gulp.watch([files.scripts, 'gulpfile.js', '.eslintrc.js',
+			base.src + '*.js'], ['scripts']).on('change', onChange);
+		gulp.watch(files.html, ['html']).on('change', onChange);
+		gulp.watch(files.styles, ['styles']).on('change', onChange);
+		gulp.watch(files.elements, ['elements']).on('change', onChange);
+		gulp.watch(files.images, ['images']).on('change', onChange);
+		gulp.watch(files.assets, ['assets']).on('change', onChange);
+		gulp.watch(files.lib, ['lib']).on('change', onChange);
+		gulp.watch(files.locales, ['locales']).on('change', onChange);
+	});
+
 // Development build
 gulp.task('dev', function(callback) {
 	isProd = false;
-
-	runSequence('clean', ['bower', 'manifest', 'html', 'scripts', 'styles',	'elements', 'images', 'assets', 'lib'], callback);
+	runSequence('clean', ['bower', 'manifest', 'html', 'scripts', 'styles',
+		'elements', 'images', 'assets', 'lib', 'locales'], callback);
 });
 
 // Production build
 gulp.task('prod', function(callback) {
 	isProd = true;
 	isProdTest = false;
-
-	runSequence('clean', ['manifest', 'html', 'scripts', 'styles',	'vulcanize', 'images', 'assets', 'lib'], 'zip', callback);
+	runSequence('clean', ['manifest', 'html', 'scripts', 'styles', 'vulcanize',
+		'images', 'assets', 'lib', 'locales', 'docs'], 'zip', callback);
 });
 
 // Production test build
 gulp.task('prodTest', function(callback) {
 	isProd = true;
 	isProdTest = true;
-
-	runSequence('clean', ['manifest', 'html', 'scripts', 'styles',	'vulcanize', 'images', 'assets', 'lib'], 'zip', callback);
+	runSequence('clean', ['manifest', 'html', 'scripts', 'styles', 'vulcanize',
+		'images', 'assets', 'lib', 'locales'], 'zip', callback);
 });
+
+// Generate JSDoc
+gulp.task('docs', function(cb) {
+	const config = require('./jsdoc.json');
+	gulp.src(['README.md', files.scripts, files.elements], {read: false})
+		.pipe(plugins.jsdoc3(config, cb));
+});
+
+// polylint elements
+gulp.task('polylint', function() {
+	return gulp.src([files.elements])
+		.pipe(plugins.polylint({noRecursion: true}))
+		.pipe(plugins.polylint.reporter(plugins.polylint.reporter.stylishlike))
+		.pipe(plugins.polylint.reporter.fail({
+			buffer: true,
+			ignoreWarnings: false,
+		}));
+});
+
+// clean output directories
+gulp.task('clean', function() {
+	return del(isProd ? base.dist : base.dev);
+});
+
+// clean output directories
+gulp.task('clean-all', function() {
+	return del([base.dist, base.dev]);
+});
+
+// manifest.json
+gulp.task('manifest', function() {
+	return gulp.src(base.src + 'manifest.json', {base: '.'})
+		.pipe(plugins.changed(isProd ? base.dist : base.dev))
+		.pipe((isProd && !isProdTest) ? plugins.stripLine('"key":') :
+			gutil.noop())
+		.pipe(isProd ? gulp.dest(base.dist) : gulp.dest(base.dev));
+});
+
+// prep bower files
+gulp.task('bower', function() {
+	return gulp.src(files.bower, {base: '.'})
+		.pipe(plugins.if('*.html', plugins.crisper(crisperOpts)))
+		.pipe(gulp.dest(base.dev));
+});
+
+// lint Javascript
+gulp.task('lintjs', function() {
+	return gulp.src([files.scripts, files.elements, './gulpfile.js',
+		'./.eslintrc.js', base.src + '*.js'], {base: '.'})
+		.pipe(plugins.changed(base.dev))
+		.pipe(plugins.eslint())
+		.pipe(plugins.eslint.format())
+		.pipe(plugins.eslint.failAfterError());
+});
+
+// scripts - lint first
+gulp.task('scripts', ['lintjs'], function() {
+	return gulp.src([files.scripts, base.src + '*.js'], {base: '.'})
+		.pipe(plugins.changed(isProd ? base.dist : base.dev))
+		.pipe(isProd ? minifier(minifierOpts,
+			uglifyjs).on('error', gutil.log) : gutil.noop())
+		.pipe(isProd ? gulp.dest(base.dist) : gulp.dest(base.dev));
+});
+
+// html
+gulp.task('html', function() {
+	return gulp.src(files.html, {base: '.'})
+		.pipe(plugins.changed(isProd ? base.dist : base.dev))
+		.pipe((isProd && !isProdTest) ?
+			gutil.noop() : plugins.replace('<!--@@build:replace -->', '<!--'))
+		.pipe(isProd ? plugins.minifyHtml() : gutil.noop())
+		.pipe(isProd ? gulp.dest(base.dist) : gulp.dest(base.dev));
+});
+
+// elements - lint first
+gulp.task('elements', ['lintjs'], function() {
+	return gulp.src(files.elements, {base: '.'})
+		.pipe(plugins.changed(base.dev))
+		.pipe(plugins.if('*.html', plugins.crisper(crisperOpts)))
+		.pipe(gulp.dest(base.dev));
+});
+
+// styles
+gulp.task('styles', function() {
+	return gulp.src(files.styles, {base: '.'})
+		.pipe(plugins.changed(isProd ? base.dist : base.dev))
+		.pipe(plugins.if('*.css', isProd ? plugins.cleanCss() : gutil.noop()))
+		.pipe(isProd ? gulp.dest(base.dist) : gulp.dest(base.dev));
+});
+
+// images
+gulp.task('images', function() {
+	return gulp.src(files.images, {base: '.'})
+		.pipe(plugins.changed(isProd ? base.dist : base.dev))
+		.pipe(plugins.imagemin({progressive: true, interlaced: true}))
+		.pipe(isProd ? gulp.dest(base.dist) : gulp.dest(base.dev));
+});
+
+// assets
+gulp.task('assets', function() {
+	return gulp.src(files.assets, {base: '.'})
+		.pipe(plugins.changed(isProd ? base.dist : base.dev))
+		.pipe(isProd ? gulp.dest(base.dist) : gulp.dest(base.dev));
+});
+
+// lib
+gulp.task('lib', function() {
+	return gulp.src(files.lib, {base: '.'})
+		.pipe(plugins.changed(isProd ? base.dist : base.dev))
+		.pipe(isProd ? gulp.dest(base.dist) : gulp.dest(base.dev));
+});
+
+// locales
+gulp.task('locales', function() {
+	return gulp.src(files.locales, {base: '.'})
+		.pipe(plugins.changed(isProd ? base.dist : base.dev))
+		.pipe(isProd ? gulp.dest(base.dist) : gulp.dest(base.dev));
+});
+
+// vulcanize for production
+gulp.task('vulcanize', function() {
+	return gulp.src(base.src + 'elements/' + 'elements.html', {base: '.'})
+		.pipe(plugins.vulcanize(vulcanizeOpts))
+		.pipe(plugins.crisper(crisperOpts))
+		.pipe(plugins.if('*.html', plugins.minifyInline()))
+		.pipe(plugins.if('*.js',
+			minifier(minifierOpts, uglifyjs).on('error', gutil.log)))
+		.pipe(gulp.dest(base.dist));
+});
+
+// compress for the Chrome Web Store
+gulp.task('zip', function() {
+	return gulp.src(base.dist + base.src + '**')
+		.pipe(!isProdTest ? plugins.zip('store.zip') :
+			plugins.zip('store-test.zip'))
+		.pipe(!isProdTest ? gulp.dest(base.store) : gulp.dest(base.dist));
+});
+

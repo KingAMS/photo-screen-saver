@@ -1,4 +1,10 @@
-﻿<!doctype html>
+﻿<!--
+  ~  Copyright (c) 2015-2017, Michael A. Updike All rights reserved.
+  ~  Licensed under the BSD-3-Clause
+  ~  https://opensource.org/licenses/BSD-3-Clause
+  ~  https://github.com/opus1269/photo-screen-saver/blob/master/LICENSE.md
+  -->
+<!doctype html>
 <html>
 <head>
 
@@ -30,10 +36,10 @@
 								src="{{item.path}}"
 								width="{{item.width}}"
 								height="{{item.height}}"
-								sizing="{{item.sizingType}}"
+								sizing="{{sizingType}}"
 								preload>
 							</iron-image>
-							<div class="time">{{item.time}}</div>
+							<div class="time">{{time}}</div>
 							<div class="author">{{item.label}}<sup id="sup"></sup></div>
 						</section>
 					</slide-animatable>
@@ -48,6 +54,8 @@
 	<!-- endbuild:replace -->
 
 	<script src="../lib/Snoocore-browser.min.js"></script>
+	<script src="../scripts/photo.js"></script>
+	<script src="../scripts/photo_view.js"></script>
 	<script src="../scripts/reddit.js"></script>
 	<script src="../scripts/google_photos.js"></script>
 	<script src="../scripts/chromecast.js"></script>
@@ -55,6 +63,7 @@
 	<script src="../scripts/flickr.js"></script>
 	<script src="../scripts/photo_sources.js"></script>
 	<script src="../scripts/utils.js"></script>
+	<script src="../scripts/storage.js"></script>
 	<script src="../scripts/screensaver.js"></script>
 
 </body>

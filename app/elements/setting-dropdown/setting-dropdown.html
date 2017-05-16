@@ -1,11 +1,14 @@
 <!--
-@@license
--->
+  ~  Copyright (c) 2015-2017, Michael A. Updike All rights reserved.
+  ~  Licensed under the BSD-3-Clause
+  ~  https://opensource.org/licenses/BSD-3-Clause
+  ~  https://github.com/opus1269/photo-screen-saver/blob/master/LICENSE.md
+  -->
 <link rel="import" href="../../bower_components/polymer/polymer.html">
-<link rel="import" href="../../bower_components/paper-styles/paper-styles.html">
-
-<link rel="import" href="../../bower_components/iron-localstorage/iron-localstorage.html">
+<link rel="import" href="../../bower_components/paper-styles/typography.html">
+<link rel="import" href="../../bower_components/paper-styles/color.html">
 <link rel="import" href="../../bower_components/iron-flex-layout/iron-flex-layout-classes.html">
+<link rel="import" href="../../bower_components/iron-localstorage/iron-localstorage.html">
 
 <link rel="import" href="../../bower_components/paper-item/paper-item.html">
 <link rel="import" href="../../bower_components/paper-menu/paper-menu.html">
@@ -13,7 +16,7 @@
 
 <dom-module id="setting-dropdown">
 	<template>
-		<style include="iron-flex iron-flex-alignment iron-flex-factors iron-positioning"></style>
+		<style include="iron-flex iron-flex-alignment"></style>
 		<style include="shared-styles"></style>
 		<style>
 			:host {
@@ -40,10 +43,11 @@
 					text-align: right;
 				};
 			}
-
 		</style>
 
-		<div class="section-title setting-label" tabindex="-1" hidden$="[[!sectionTitle]]">{{sectionTitle}}</div>
+		<div class="section-title setting-label" tabindex="-1" hidden$="[[!sectionTitle]]">
+			{{sectionTitle}}
+		</div>
 
 		<paper-item class="center horizontal layout" tabindex="-1">
 			<div class="setting-label flex">{{label}}</div>
@@ -55,61 +59,58 @@
 				</paper-menu>
 			</paper-dropdown-menu>
 		</paper-item>
-		<hr hidden$="[[noseparator]]" />
+		<hr hidden$="[[noseparator]]"/>
 		<iron-localstorage name="{{name}}" value="{{value}}" on-iron-localstorage-load-empty="_init"></iron-localstorage>
 
 	</template>
 </dom-module>
 
 <script>
-'use strict';
+	'use strict';
 
-Polymer({
-	is: 'setting-dropdown',
+	Polymer({
+		is: 'setting-dropdown',
 
-	hostAttributes: {
-		role: 'group',
-		tabIndex: -1
-	},
+		properties: {
+			name: {
+				type: String,
+				value: 'store',
+			},
 
-	properties: {
+			label: {
+				type: String,
+				value: '',
+			},
 
-		name: {
-			type: String,
-			value: 'store'
+			items: {
+				type: Array,
+				value: function() {
+					return [];
+				},
+			},
+
+			sectionTitle: {
+				type: String,
+				value: '',
+			},
+
+			disabled: {
+				type: Boolean,
+				value: false,
+			},
+
+			noseparator: {
+				type: Boolean,
+				value: false,
+			},
 		},
 
-		label: {
-			type: String,
-			value: ''
+		/**
+		 * Initialize value if it is not in localstorage
+		 * @private
+		 */
+		_init: function() {
+			this.set('value', '0');
 		},
-
-		items: {
-			type: Array,
-			value: function() { return []; }
-		},
-
-		sectionTitle: {
-			type: String,
-			value: ''
-		},
-
-		disabled: {
-			type: Boolean,
-			value: false
-		},
-
-		noseparator: {
-			type: Boolean,
-			value: false
-		}
-
-	},
-
-	// initialize value if it is not in localstorage
-	_init: function() {
-		this.set('value', '0');
-	}
-
-});
+	});
 </script>

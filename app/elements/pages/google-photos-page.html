@@ -1,17 +1,23 @@
 <!--
-@@license
--->
+  ~  Copyright (c) 2015-2017, Michael A. Updike All rights reserved.
+  ~  Licensed under the BSD-3-Clause
+  ~  https://opensource.org/licenses/BSD-3-Clause
+  ~  https://github.com/opus1269/photo-screen-saver/blob/master/LICENSE.md
+  -->
 <link rel="import" href="../../bower_components/polymer/polymer.html">
-<link rel="import" href="../../bower_components/paper-styles/paper-styles.html">
+<link rel="import" href="../../bower_components/paper-styles/typography.html">
+<link rel="import" href="../../bower_components/paper-styles/color.html">
 
 <link rel="import" href="../../bower_components/iron-flex-layout/iron-flex-layout-classes.html">
 <link rel="import" href="../../bower_components/iron-label/iron-label.html">
 <link rel="import" href="../../bower_components/iron-image/iron-image.html">
-<link rel="import" href="../../bower_components/iron-icons/iron-icons.html">
 <link rel="import" href="../../bower_components/iron-localstorage/iron-localstorage.html">
 
 <link rel="import" href="../../bower_components/paper-material/paper-material.html">
 <link rel="import" href="../../bower_components/paper-ripple/paper-ripple.html">
+<link rel="import" href="../../bower_components/paper-dialog/paper-dialog.html">
+<link rel="import" href="../../bower_components/paper-dialog-scrollable/paper-dialog-scrollable.html">
+<link rel="import" href="../../bower_components/paper-button/paper-button.html">
 <link rel="import" href="../../bower_components/paper-item/paper-item.html">
 <link rel="import" href="../../bower_components/paper-item/paper-item-body.html">
 <link rel="import" href="../../bower_components/paper-toolbar/paper-toolbar.html">
@@ -21,9 +27,13 @@
 <link rel="import" href="../../bower_components/paper-checkbox/paper-checkbox.html">
 <link rel="import" href="../../bower_components/paper-tooltip/paper-tooltip.html">
 
+<link rel="import" href="../localize-behavior/localize-behavior.html">
+
+<link rel="import" href="../my_icons.html">
+
 <dom-module id="google-photos-page">
 	<template>
-		<style include="iron-flex iron-flex-alignment iron-flex-factors iron-positioning"></style>
+		<style include="iron-flex iron-flex-alignment"></style>
 		<style include="shared-styles"></style>
 		<style>
 
@@ -35,7 +45,7 @@
 		::-webkit-scrollbar-thumb {
 			background: rgba(63, 81, 181, 1);
 		}
-		
+
 		.page-toolbar {
 			margin: 0;
 		}
@@ -60,6 +70,8 @@
 			@apply(--paper-font-title);
 			border: 1px #CCCCCC;
 			border-bottom-style: solid;
+			padding: 8px 16px 8px 16px;
+			white-space: normal;
 		}
 
 		.list-item {
@@ -100,53 +112,69 @@
 		<paper-material elevation="1" class="page-container">
 			<paper-material elevation="1">
 				<paper-toolbar class="page-toolbar">
-					<div class="flex">Google Photos Albums</div>
+					<div class="flex">{{localize('google_title')}}</div>
 					<paper-icon-button
 							id="select"
-							icon="check-box"
+							icon="myicons:check-box"
 							on-tap="_selectAllTapped"
 							disabled$="[[!useGoogle]]"></paper-icon-button>
-					<paper-tooltip
-							for="select"
-							position="left" offset="0">Select all albums</paper-tooltip>
+					<paper-tooltip for="select" position="left" offset="0">
+						{{localize('tooltip_select')}}
+					</paper-tooltip>
 					<paper-icon-button
 							id="deselect"
-							icon="check-box-outline-blank"
+							icon="myicons:check-box-outline-blank"
 							on-tap="_deselectAllTapped"
 							disabled$="[[!useGoogle]]"></paper-icon-button>
-					<paper-tooltip
-							for="deselect"
-							position="left" offset="0">Deselect all albums</paper-tooltip>
+					<paper-tooltip for="deselect" position="left" offset="0">
+						{{localize('tooltip_deselect')}}
+					</paper-tooltip>
 					<paper-icon-button
 							id="refresh"
-							icon="refresh"
+							icon="myicons:refresh"
 							on-tap="_refreshTapped"
 							disabled$="[[!useGoogle]]"></paper-icon-button>
-					<paper-tooltip
-							for="refresh"
-							position="left" offset="0">Refresh album list</paper-tooltip>
+					<paper-tooltip for="refresh" position="left" offset="0">
+						{{localize('tooltip_refresh')}}
+					</paper-tooltip>
 					<paper-toggle-button
 							id="googlePhotosToggle"
 							checked="{{useGoogle}}"></paper-toggle-button>
-					<paper-tooltip
-							for="googlePhotosToggle"
-							position="left" offset="0">Enable/disable use of albums</paper-tooltip>
+					<paper-tooltip for="googlePhotosToggle" position="left" offset="0">
+						{{localize('tooltip_google_toggle')}}
+					</paper-tooltip>
 					<iron-localstorage name="useGoogle" value="{{useGoogle}}"></iron-localstorage>
 				</paper-toolbar>
 			</paper-material>
 
-			<paper-item class="list-note" hidden$="[[waitForLoad]]">Note: Shared albums may not be available.  See the FAQ for more info.</paper-item>
-
 			<div class="page-content">
+
+				<!-- Error dialog -->
+				<paper-dialog id="errorDialog" modal entry-animation="scale-up-animation"
+				              exit-animation="fade-out-animation">
+					<h2 id="dialogTitle"></h2>
+					<paper-dialog-scrollable>
+						<p id="dialogText"></p>
+					</paper-dialog-scrollable>
+					<div class="buttons">
+						<paper-button dialog-dismiss>{{localize('ok')}}</paper-button>
+					</div>
+				</paper-dialog>
 
 				<div class="waiter" hidden$="[[!waitForLoad]]">
 					<div class="horizontal center-justified layout">
-						<paper-spinner alt="Loading Albums" active="[[waitForLoad]]"></paper-spinner>
+						<paper-spinner alt="{{localize('google_loading')}}" active="[[waitForLoad]]"></paper-spinner>
 					</div>
-					<paper-item class="horizontal center-justified layout">Loading Albums</paper-item>
+					<paper-item class="horizontal center-justified layout">
+						{{localize('google_loading')}}
+					</paper-item>
 				</div>
 
 				<div class="list-container" hidden$="[[waitForLoad]]">
+					<paper-item class="list-note" hidden$="[[waitForLoad]]">
+						{{localize('google_shared_albums_note')}}
+					</paper-item>
+
 					<template is="dom-repeat" id="t" items="{{albums}}">
 						<div class="list-item" id="[[item.uid]]" disabled$="[[!useGoogle]]">
 							<iron-label>
@@ -154,7 +182,7 @@
 									<paper-checkbox iron-label-target checked="{{item.checked}}" on-change="_albumSelectChange" disabled$="[[!useGoogle]]"></paper-checkbox>
 									<paper-item-body class="flex" two-line>
 										<div class="setting-label">{{item.name}}</div>
-										<div class="setting-label" secondary><span>[[item.ct]]</span><span>&nbsp;photos</span></div>
+										<div class="setting-label" secondary>{{_computePhotoLabel(item.ct)}}</div>
 										<paper-ripple center></paper-ripple>
 									</paper-item-body>
 									<iron-image src="[[item.thumb]]" sizing="cover" preload disabled$="[[!useGoogle]]"></iron-image>
@@ -170,153 +198,184 @@
 </dom-module>
 
 <script>
-	GooglePhotosPage = Polymer({
-		is: 'google-photos-page',
+'use strict';
+window.app = window.app || {};
+app.GooglePhotosPage = Polymer({
+	is: 'google-photos-page',
 
-		// so we can lazily create the page
-		factoryImpl: function(id, dialogEl, dialogTitleEl, dialogTextEl) {
-			this.setAttribute('id', id);
-			this.dialogEl = dialogEl;
-			this.dialogTitleEl = dialogTitleEl;
-			this.dialogTextEl = dialogTextEl;
+	behaviors: [
+		app.LocalizeBehavior,
+	],
+
+	properties: {
+		albums: {
+			type: Array,
+			notify: true,
+			value: [],
 		},
 
-		properties: {
-
-			albums: {
-				type: Array,
-				notify: true,
-				value: []
-			},
-
-			selections: {
-				type: Array,
-				value: []
-			},
-
-			waitForLoad: {
-				type: Boolean,
-				value: false
-			},
-
-			dialogEl: {
-				type: Object,
-				value: {}
-			},
-
-			dialogTitleEl: {
-				type: Object,
-				value: {}
-			},
-
-			dialogTextEl: {
-				type: Object,
-				value: {}
-			}
-
+		selections: {
+			type: Array,
+			value: [],
 		},
 
-		ready: function() {
-			this.loadAlbumList();
+		waitForLoad: {
+			type: Boolean,
+			value: false,
 		},
+	},
 
-		// Query Picasa for the list of the users albums
-		loadAlbumList: function() {
-			this.set('waitForLoad', true);
-			gPhotos.loadAlbumList(function(error, albums) {
-				if (!error) {
-					this.splice('albums', 0, this.albums.length);
-					for (var i = 0; i < albums.length; i++) {
-						this.push('albums', JSON.parse(JSON.stringify(albums[i])));
-					}
-					photoSources.process('useGoogle', function(error) {
-						if (error) {
-							this.dialogTitleEl.innerHTML = 'Request failed. Select refresh to try again.';
-							this.dialogTextEl.innerHTML = error;
-							this.dialogEl.open();
-						} else {
-							this._selectAlbums();
-						}
-					}.bind(this));
-				} else {
-					this.dialogTitleEl.innerHTML = 'Request failed. Select refresh to try again.';
-					this.dialogTextEl.innerHTML = error;
-					this.dialogEl.open();
+	// so we can lazily create the page
+	factoryImpl: function(id) {
+		this.setAttribute('id', id);
+	},
+
+	ready: function() {
+		this.loadAlbumList();
+	},
+
+	/**
+	 * Query Picasa for the list of the users albums
+	 */
+	loadAlbumList: function() {
+		this.set('waitForLoad', true);
+		app.GooglePhotos.loadAlbumList(function(error, albums) {
+			if (!error) {
+				this.splice('albums', 0, this.albums.length);
+				for (let i = 0; i < albums.length; i++) {
+					this.push('albums', JSON.parse(JSON.stringify(albums[i])));
 				}
+				app.PhotoSource.process('useGoogle', function(error) {
+					if (error) {
+						this.set('waitForLoad', false);
+						this.$.dialogTitle.innerHTML =
+							app.Utils.localize('err_request_failed');
+						this.$.dialogText.innerHTML = error;
+						this.$.errorDialog.open();
+					} else {
+						this._selectAlbums();
+					}
+				}.bind(this));
+			} else {
 				this.set('waitForLoad', false);
-			}.bind(this));
-		},
-
-		// refresh the album list
-		_refreshTapped: function() {
-			this.loadAlbumList();
-		},
-
-		// select all albums
-		_selectAllTapped: function() {
-			var item;
-			for (var i = 0; i < this.albums.length; i++) {
-				item = this.albums[i];
-				if (!item.checked) {
-					this.selections.push({id: item.id, photos: item.photos});
-					if (!myUtils.localStorageSafeSet('albumSelections', JSON.stringify(this.selections))) {
-						// exceeded storage limits
-						this.selections.pop();
-						break;
-					}
-					this.set('albums.' + i + '.checked', true);
-				}
+				this.$.dialogTitle.innerHTML =
+					app.Utils.localize('err_request_failed');
+				this.$.dialogText.innerHTML = error;
+				this.$.errorDialog.open();
 			}
-		},
+			this.set('waitForLoad', false);
+		}.bind(this));
+	},
 
-		// deselect all albums
-		_deselectAllTapped: function() {
-			this._uncheckAll();
-			this.selections.splice(0, this.selections.length);
-			localStorage.albumSelections = JSON.stringify(this.selections);
-		},
+	/**
+	 * Event: Handle tap on refresh album list icon
+	 * @private
+	 */
+	_refreshTapped: function() {
+		this.loadAlbumList();
+	},
 
-		// handle tap on checkbox for an album
-		_albumSelectChange: function(event) {
-			var item = event.model.item;
-			var index = this.selections.map(function(e) {return e.id;}).indexOf(item.id);
-
-			if (index !== -1) {
-				this.selections.splice(index, 1);
-			}
-
-			if (item.checked) {
+	/**
+	 * Event: Handle tap on select all albums icon
+	 * @private
+	 */
+	_selectAllTapped: function() {
+		let item;
+		for (let i = 0; i < this.albums.length; i++) {
+			item = this.albums[i];
+			if (!item.checked) {
 				this.selections.push({id: item.id, photos: item.photos});
-			}
-
-			if (!myUtils.localStorageSafeSet('albumSelections', JSON.stringify(this.selections))) {
-				// exceeded storage limits
-				this.selections.pop();
-				this.set('albums.' + item.index + '.checked', false);
-			}
-		},
-
-		// set the checked state of the albums
-		_selectAlbums: function() {
-			this.selections = myUtils.getJSON('albumSelections');
-			for (var i = 0; i < this.albums.length; i++) {
-				for (var j = 0; j < this.selections.length; j++) {
-					if (this.albums[i].id === this.selections[j].id) {
-						this.set('albums.' + i + '.checked', true);
-						break;
-					}
+				const set = app.Storage
+					.safeSet('albumSelections', this.selections, null);
+				if (!set) {
+					// exceeded storage limits
+					this.selections.pop();
+					break;
 				}
+				this.set('albums.' + i + '.checked', true);
 			}
-		},
+		}
+	},
 
-		// uncheck all albums
-		_uncheckAll: function() {
-			for (var i = 0; i < this.albums.length; i++) {
-				if (this.albums[i].checked) {
-					this.set('albums.' + i + '.checked', false);
+	/**
+	 * Event: Handle tap on deselect all albums icon
+	 * @private
+	 */
+	_deselectAllTapped: function() {
+		this._uncheckAll();
+		this.selections.splice(0, this.selections.length);
+		localStorage.albumSelections = JSON.stringify(this.selections);
+	},
+
+	/**
+	 * Event: Handle tap on checkbox for an album
+	 * @param {Event} event - tap event
+	 * @param {Event} event.model - our model
+	 * @private
+	 */
+	_albumSelectChange: function(event) {
+		const item = event.model.item;
+		const index = this.selections.map(function(e) {
+			return e.id;
+		}).indexOf(item.id);
+
+		if (index !== -1) {
+			this.selections.splice(index, 1);
+		}
+
+		if (item.checked) {
+			this.selections.push({id: item.id, photos: item.photos});
+		}
+
+		const set =
+			app.Storage.safeSet('albumSelections', this.selections, null);
+		if (!set) {
+			// exceeded storage limits
+			this.selections.pop();
+			this.set('albums.' + item.index + '.checked', false);
+		}
+	},
+
+	/**
+	 * Set the checked state of the stored albums
+	 * @private
+	 */
+	_selectAlbums: function() {
+		this.selections = app.Storage.get('albumSelections');
+		for (let i = 0; i < this.albums.length; i++) {
+			for (let j = 0; j < this.selections.length; j++) {
+				if (this.albums[i].id === this.selections[j].id) {
+					this.set('albums.' + i + '.checked', true);
+					break;
 				}
 			}
 		}
+	},
 
-	});
+	/**
+	 * Uncheck all albums
+	 * @private
+	 */
+	_uncheckAll: function() {
+		for (let i = 0; i < this.albums.length; i++) {
+			if (this.albums[i].checked) {
+				this.set('albums.' + i + '.checked', false);
+			}
+		}
+	},
+
+	/**
+	 * Computed property: Set photo count label on album entry
+	 * @param {int} count - number of photos in album
+	 * @returns {string} i18n label
+	 * @private
+	 */
+	_computePhotoLabel: function(count) {
+		let ret = `${count} ${app.Utils.localize('photos')}`;
+		if (count === 1) {
+			ret = `${count} ${app.Utils.localize('photo')}`;
+		}
+		return ret;
+	},
+});
 </script>

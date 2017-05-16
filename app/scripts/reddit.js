@@ -1,35 +1,98 @@
 /*
-@@license
-*/
-/*exported reddit*/
-var reddit = (function() {
+ *  Copyright (c) 2015-2017, Michael A. Updike All rights reserved.
+ *  Licensed under the BSD-3-Clause
+ *  https://opensource.org/licenses/BSD-3-Clause
+ *  https://github.com/opus1269/photo-screen-saver/blob/master/LICENSE.md
+ */
+window.app = window.app || {};
+app.Reddit = (function() {
 	'use strict';
-	/*jshint camelcase: false*/
-	// jscs:disable requireCamelCaseOrUpperCaseIdentifiers
 
-	var KEY = 'bATkDOUNW_tOlg';
-	var MAX_PHOTOS = 100;
-	var MIN_SIZE = 750;
-	var MAX_SIZE = 3500;
+	/**
+	 * Interface to Reddit API
+	 * @namespace app.Reddit
+	 */
 
-	// Expose reddit
-	var snoocore = new Snoocore({
+	/**
+	 * Extensions redirect uri
+	 * @type {string}
+	 * @const
+	 * @default
+	 * @private
+	 * @memberOf app.Reddit
+	 */
+	const REDIRECT_URI =
+		'https://kohpcmlfdjfdggcjmjhhbcbankgmppgc.chromiumapp.org/reddit';
+
+	/**
+	 * Reddit rest API authorization key
+	 * @type {string}
+	 * @const
+	 * @default
+	 * @private
+	 * @memberOf app.Reddit
+	 */
+	const KEY = 'bATkDOUNW_tOlg';
+
+	/**
+	 * Max photos to return
+	 * @type {int}
+	 * @const
+	 * @default
+	 * @private
+	 * @memberOf app.Reddit
+	 */
+	const MAX_PHOTOS = 100;
+	/**
+	 * Min size of photo to use
+	 * @type {int}
+	 * @const
+	 * @default
+	 * @private
+	 * @memberOf app.Reddit
+	 */
+	const MIN_SIZE = 750;
+
+	/**
+	 * Max size of photo to use
+	 * @type {int}
+	 * @const
+	 * @default
+	 * @private
+	 * @memberOf app.Reddit
+	 */
+	const MAX_SIZE = 3500;
+
+	/**
+	 * Expose reddit API
+	 * @type {function}
+	 * @const
+	 * @private
+	 * @memberOf app.Reddit
+	 */
+	const snoocore = new Snoocore({
 		userAgent: 'photo-screen-saver',
 		throttle: 0,
 		oauth: {
 			type: 'implicit',
 			key: KEY,
-			redirectUri: 'https://kohpcmlfdjfdggcjmjhhbcbankgmppgc.chromiumapp.org/reddit',
-			scope: ['read']
-		}
+			redirectUri: REDIRECT_URI,
+			scope: ['read'],
+		},
 	});
 
-	// parse the size from the submission title
-	// this is the old way reddit did it
-	var getSize  = function(title) {
-		var ret = {width: -1, height: -1};
-		var res;
-		var regex = /\[(\d*)\D*(\d*)\]/;
+	/**
+	 * Parse the size from the submission title.
+	 * this is the old way reddit did it
+	 * @param {string} title - submission title
+	 * @returns {{width: int, height: int}} Photo size
+	 * @private
+	 * @memberOf app.Reddit
+	 */
+	function _getSize(title) {
+		let ret = {width: -1, height: -1};
+		let res;
+		const regex = /\[(\d*)\D*(\d*)\]/;
 
 		res = title.match(regex);
 		if (res) {
@@ -37,25 +100,26 @@ var reddit = (function() {
 			ret.height = parseInt(res[2], 10);
 		}
 		return ret;
-	};
+	}
 
 	/**
 	 * Build the list of photos for one page of items
-	 *
 	 * @param {Array} children Array of photos returned from reddit
-	 * @returns {Array} Array of images in our format, stripped of NSFW and big and small photos
-	 *
+	 * @returns {Array} Array of images in our format,
+	 * stripped of NSFW and big and small photos
+	 * @private
+	 * @memberOf app.Reddit
 	 */
-	var processChildren = function(children) {
-		var data;
-		var item;
-		var images = [];
-		var url;
-		var width = 1;
-		var height = 1;
-		var asp;
+	const _processChildren = function(children) {
+		let data;
+		let item;
+		const images = [];
+		let url;
+		let width = 1;
+		let height = 1;
+		let asp;
 
-		for (var j = 0; j < children.length; j++) {
+		for (let j = 0; j < children.length; j++) {
 			data = children[j].data;
 			if (data.over_18) {
 				// skip NSFW
@@ -75,46 +139,45 @@ var reddit = (function() {
 				}
 			} else if (data.title) {
 				// old way of specifying images
-				var size = getSize(data.title);
+				const size = _getSize(data.title);
 				url = data.url;
 				width = size.width;
 				height = size.height;
 			}
 
 			asp = width / height;
-			if (asp && !isNaN(asp) && Math.max(width, height) >= MIN_SIZE && Math.max(width, height) <= MAX_SIZE) {
-				myUtils.addImage(images, url, data.author, asp, data.url);
+			if (asp && !isNaN(asp) && (Math.max(width, height) >= MIN_SIZE) &&
+				(Math.max(width, height) <= MAX_SIZE)) {
+				app.Utils.addImage(images, url, data.author, asp, data.url);
 			}
 		}
 		return images;
 	};
 
 	return {
-
 		/**
 		 * Retrieve the array of reddit photos
-		 *
-		 * @param {string} subreddit name of photo subreddit
-		 * @param {function} callback error, photos) Array of photos on success
-		 *
+		 * @param {string} subreddit - name of photo subreddit
+		 * @param {function} callback (error, photos) Array of photos on success
+		 * @memberOf app.Reddit
 		 */
 		loadImages: function(subreddit, callback) {
 			// callback(error, photos)
 			callback = callback || function() {};
 			
-			var photos = [];
+			let photos = [];
 
 			snoocore(subreddit + 'hot').listing({
-				limit: MAX_PHOTOS
+				limit: MAX_PHOTOS,
 			}).then(function(slice) {
-				photos = photos.concat(processChildren(slice.children));
+				photos = photos.concat(_processChildren(slice.children));
 				return slice.next();
 			}).then(function(slice) {
-				photos = photos.concat(processChildren(slice.children));
+				photos = photos.concat(_processChildren(slice.children));
 				callback(null, photos);
 			}).catch(function(reason) {
 				callback(reason);
 			});
-		}
+		},
 	};
 })();

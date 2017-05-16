@@ -1,29 +1,33 @@
 /*
-@@license
-*/
-/*exported chromeCast*/
-var chromeCast = (function() {
+ *  Copyright (c) 2015-2017, Michael A. Updike All rights reserved.
+ *  Licensed under the BSD-3-Clause
+ *  https://opensource.org/licenses/BSD-3-Clause
+ *  https://github.com/opus1269/photo-screen-saver/blob/master/LICENSE.md
+ */
+window.app = window.app || {};
+app.ChromeCast = (function() {
 	'use strict';
 
-	return {
+	/**
+	 * Interface to the chromecast photos
+	 * @namespace app.ChromeCast
+	 */
 
+	return {
 		/**
-		 * get the photos from chromecast.json
-		 *
+		 * Get the photos from chromecast.json
 		 * @param {function} callback (error, photos)
-		 *
+		 * @memberOf app.ChromeCast
 		 */
 		loadImages: function(callback) {
-			// callback(error, photos)
 			callback = callback || function() {};
-			var photos = [];
-
-			var xhr = new XMLHttpRequest();
+			let photos = [];
+			const xhr = new XMLHttpRequest();
 
 			xhr.onload = function() {
 				if (xhr.status === 200) {
 					photos = JSON.parse(xhr.responseText);
-					for (var i = 0; i < photos.length; i++) {
+					for (let i = 0; i < photos.length; i++) {
 						photos[i].asp = 16 / 9;
 					}
 					callback(null, photos);
@@ -32,12 +36,12 @@ var chromeCast = (function() {
 				}
 			};
 
-			xhr.onerror = function(e) {
-				callback(e);
+			xhr.onerror = function(error) {
+				callback(error);
 			};
 
 			xhr.open('GET', '/assets/chromecast.json', true);
 			xhr.send();
-		}
+		},
 	};
 })();

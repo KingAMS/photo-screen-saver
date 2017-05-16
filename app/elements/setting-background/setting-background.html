@@ -1,11 +1,15 @@
 <!--
-@@license
--->
+  ~  Copyright (c) 2015-2017, Michael A. Updike All rights reserved.
+  ~  Licensed under the BSD-3-Clause
+  ~  https://opensource.org/licenses/BSD-3-Clause
+  ~  https://github.com/opus1269/photo-screen-saver/blob/master/LICENSE.md
+  -->
 <link rel="import" href="../../bower_components/polymer/polymer.html">
-<link rel="import" href="../../bower_components/paper-styles/paper-styles.html">
-
+<link rel="import" href="../../bower_components/paper-styles/typography.html">
+<link rel="import" href="../../bower_components/paper-styles/color.html">
 <link rel="import" href="../../bower_components/iron-flex-layout/iron-flex-layout-classes.html">
 <link rel="import" href="../../bower_components/iron-localstorage/iron-localstorage.html">
+
 <link rel="import" href="../../bower_components/iron-selector/iron-selector.html">
 
 <link rel="import" href="../../bower_components/paper-item/paper-item.html">
@@ -14,59 +18,59 @@
 <link rel="import" href="../../bower_components/paper-dialog/paper-dialog.html">
 <link rel="import" href="../../bower_components/paper-button/paper-button.html">
 
+<link rel="import" href="../localize-behavior/localize-behavior.html">
+
 <dom-module id="setting-background">
 	<template>
-		<style include="iron-flex iron-flex-alignment iron-flex-factors iron-positioning"></style>
+		<style include="iron-flex iron-flex-alignment"></style>
 		<style include="shared-styles"></style>
 		<style>
+			:host {
+				display: block;
+				position: relative;
+			}
 
-		:host {
-			display: block;
-			position: relative;
-		}
+			:host([disabled]) {
+				pointer-events: none;
+			}
 
-		:host([disabled]) {
-			pointer-events: none;
-		}
+			:host paper-item {
+				display: block;
+				position: relative;
+				cursor: pointer;
+			}
 
-		:host paper-item {
-			display: block;
-			position: relative;
-			cursor: pointer;
-		}
+			:host([indent]) paper-item {
+				padding-left: 24px;
+			}
 
-		:host([indent]) paper-item {
-			padding-left: 24px;
-		}
+			:host .container {
+				width: 640px;
+			}
 
-		:host .container {
-			width: 640px;
-		}
+			:host .background {
+				width: 200px;
+				height: 112px;
+				border: 2px solid white;
+			}
 
-		:host .background {
-			width: 200px;
-			height: 112px;
-			border: 2px solid white;
-		}
+			:host .iron-selected {
+				border: 2px solid red;
+			}
 
-		:host .iron-selected {
-			border: 2px solid red;
-		}
+			:host .selected-background {
+				width: 100px;
+				height: 56px;
+			}
 
-		:host .selected-background {
-			width: 100px;
-			height: 56px;
-		}
-
-		.selected-background[disabled] {
-			opacity: .2;
-		}
-
+			.selected-background[disabled] {
+				opacity: .2;
+			}
 		</style>
 
 		<paper-dialog id="dialog" modal entry-animation="scale-up-animation"
 			exit-animation="fade-out-animation">
-			<h2>Select background style</h2>
+			<h2>{{localize('setting_bg_dialog_title')}}</h2>
 			<iron-selector class="container horizontal layout wrap" attr-for-selected="id" selected="{{selected}}">
 				<div id="b1" class="background" style="background:linear-gradient(to bottom, #3a3a3a, #b5bdc8)"></div>
 				<div id="b2" class="background" style="background:linear-gradient(to bottom, #003973 10%, #E5E5BE 90%)"></div>
@@ -76,98 +80,110 @@
 				<div id="b6" class="background" style="background:black"></div>
 			</iron-selector>
 			<div class="buttons">
-				<paper-button dialog-dismiss>CANCEL</paper-button>
-				<paper-button dialog-confirm autofocus on-tap="_onOK">OK</paper-button>
+				<paper-button dialog-dismiss>{{localize('cancel')}}</paper-button>
+				<paper-button dialog-confirm autofocus on-tap="_onOK">{{localize('ok')}}</paper-button>
 			</div>
 		</paper-dialog>
 
-		<div class="section-title setting-label" tabindex="-1" hidden$="[[!sectionTitle]]">{{sectionTitle}}</div>
+		<div class="section-title setting-label" tabindex="-1" hidden$="[[!sectionTitle]]">
+			{{sectionTitle}}
+		</div>
 
-		<paper-item class="center horizontal layout" on-tap="_onTap">
+		<paper-item class="center horizontal layout" tabindex="-1" on-tap="_onTap">
 			<paper-item-body class="flex" two-line>
-				<div class="setting-label" hidden$="[[!mainLabel]]">{{mainLabel}}</div>
-				<div class="setting-label" secondary hidden$="[[!secondaryLabel]]">{{secondaryLabel}}</div>
+				<div class="setting-label" hidden$="[[!mainLabel]]">
+					{{mainLabel}}
+				</div>
+				<div class="setting-label" secondary hidden$="[[!secondaryLabel]]">
+					{{secondaryLabel}}
+				</div>
 			</paper-item-body>
-			<div class="selected-background" style$="[[value]]" disabled$="[[disabled]]"></div>
+			<div class="selected-background" style$="[[value]]" tabindex="0" disabled$="[[disabled]]"></div>
 			<paper-ripple center></paper-ripple>
 		</paper-item>
-		<hr hidden$="[[noseparator]]" />
+		<hr hidden$="[[noseparator]]"/>
 		<iron-localstorage name="{{name}}" value="{{value}}" on-iron-localstorage-load-empty="_init"></iron-localstorage>
 
 	</template>
 </dom-module>
 
 <script>
-'use strict';
+	'use strict';
+	Polymer({
+		is: 'setting-background',
 
-Polymer({
-	is: 'setting-background',
+		behaviors: [
+			app.LocalizeBehavior,
+		],
 
-	hostAttributes: {
-		role: 'group',
-		tabIndex: -1
-	},
+		properties: {
+			name: {
+				type: String,
+				value: 'store',
+			},
 
-	properties: {
+			selected: {
+				type: String,
+				value: 'b1',
+				notify: true,
+			},
 
-		name: {
-			type: String,
-			value: 'store'
+			value: {
+				type: String,
+				value: 'background:linear-gradient(to bottom, #3a3a3a, #b5bdc8)',
+				notify: true,
+			},
+
+			mainLabel: {
+				type: String,
+				value: '',
+			},
+
+			secondaryLabel: {
+				type: String,
+				value: '',
+			},
+
+			sectionTitle: {
+				type: String,
+				value: '',
+			},
+
+			disabled: {
+				type: Boolean,
+				value: false,
+			},
+
+			noseparator: {
+				type: Boolean,
+				value: false,
+			},
 		},
 
-		selected: {
-			type: String,
-			value: 'b1',
-			notify: true
+		/**
+		 * Initialize value if it is not in localstorage
+		 * @private
+		 */
+		_init: function() {
+			this.set('value',
+				'background:linear-gradient(to bottom, #3a3a3a, #b5bdc8)');
 		},
 
-		value: {
-			type: String,
-			value: 'background:linear-gradient(to bottom, #3a3a3a, #b5bdc8)',
-			notify: true
+		/**
+		 * Event: Show dialog on tap
+		 * @private
+		 */
+		_onTap: function() {
+			this.$.dialog.open();
 		},
 
-		mainLabel: {
-			type: String,
-			value: ''
+		/**
+		 * Event: Set selected background on tap of OK button
+		 * @private
+		 */
+		_onOK: function() {
+			const el = document.getElementById(this.selected);
+			this.set('value', 'background:' + el.style.background);
 		},
-
-		secondaryLabel: {
-			type: String,
-			value: ''
-		},
-
-		sectionTitle: {
-			type: String,
-			value: ''
-		},
-
-		disabled: {
-			type: Boolean,
-			value: false
-		},
-
-		noseparator: {
-			type: Boolean,
-			value: false
-		}
-
-	},
-
-	// initialize value if it is not in localstorage
-	_init: function() {
-		this.set('value', 'background:linear-gradient(to bottom, #3a3a3a, #b5bdc8)');
-	},
-
-	_onTap: function() {
-		this.$.dialog.open();
-	},
-
-	// save the currently selected background
-	_onOK: function() {
-		var el = document.getElementById(this.selected);
-		this.set('value','background:' + el.style.background);
-	}
-
-});
+	});
 </script>

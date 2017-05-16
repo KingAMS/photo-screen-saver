@@ -1,14 +1,61 @@
 /*
-@@license
-*/
+ *  Copyright (c) 2015-2017, Michael A. Updike All rights reserved.
+ *  Licensed under the BSD-3-Clause
+ *  https://opensource.org/licenses/BSD-3-Clause
+ *  https://github.com/opus1269/photo-screen-saver/blob/master/LICENSE.md
+ */
 (function(document) {
 	'use strict';
 
-	// path to the extension
-	var EXT_URI = 'https://chrome.google.com/webstore/detail/photo-screen-saver/kohpcmlfdjfdggcjmjhhbcbankgmppgc/';
+	/**
+	 * Extension's Options page
+	 * @namespace app.Options
+	 */
 
-	// auto-binding template
-	var t = document.querySelector('#t');
+	/**
+	 * Manage an html page that is inserted on demand<br />
+	 * May also be a url link to external site
+	 * @typedef {Object} app.Options.Page
+	 * @property {string} label - label for Nav menu
+	 * @property {string} route - element name route to page
+	 * @property {string} icon - icon for Nav Menu
+	 * @property {?Object} obj - something to be done when selected
+	 * @property {boolean} ready - true if html is inserted
+	 * @property {boolean} divider - true for divider before item
+	 * @memberOf app.Options
+	 */
+
+	/**
+	 * Path to the extension in the Web Store
+	 * @type {string}
+	 * @const
+	 * @private
+	 * @memberOf app.Options
+	 */
+	const EXT_URI =
+		'https://chrome.google.com/webstore/detail/photo-screen-saver/' +
+		chrome.runtime.id + '/';
+
+	/**
+	 * Path to my Pushy Clipboard extension
+	 * @type {string}
+	 * @const
+	 * @default
+	 * @private
+	 * @memberOf app.Options
+	 */
+	const PUSHY_URI =
+		'https://chrome.google.com/webstore/detail/pushy-clipboard/' +
+		'jemdfhaheennfkehopbpkephjlednffd';
+
+	/**
+	 * auto-binding template
+	 * @type {Object}
+	 * @const
+	 * @private
+	 * @memberOf app.Options
+	 */
+	const t = document.querySelector('#t');
 
 	// Error dialog
 	t.dialogTitle = '';
@@ -21,8 +68,27 @@
 	t.prevRoute = 'page-settings';
 
 	/**
+	 * Computed property: Page title
+	 * @returns {string} i18n title
+	 * @memberOf app.Options
+	 */
+	t.computeTitle = function() {
+		return app.Utils.localize('chrome_extension_name');
+	};
+
+	/**
+	 * Computed property: Menu label
+	 * @returns {string} i18n label
+	 * @memberOf app.Options
+	 */
+	t.computeMenu = function() {
+		return app.Utils.localize('menu');
+	};
+
+	/**
 	 * Event Listener for template bound event to know when bindings
 	 * have resolved and content has been stamped to the page
+	 * @memberOf app.Options
 	 */
 	t.addEventListener('dom-change', function() {
 		// listen for app messages
@@ -32,16 +98,16 @@
 	/**
 	 * Event Listener for main menu clicks
 	 * Route to proper page
-	 *
-	 * @param {Event} event
-	 *
+	 * @param {Event} event - ClickEvent
+	 * @memberOf app.Options
 	 */
 	t.onDataRouteClick = function(event) {
-
 		// Close drawer after menu item is selected if drawerPanel is narrow
 		t.closeDrawer();
 
-		var index = t.pages.map(function(e) {return e.route;}).indexOf(event.currentTarget.id);
+		const index = t.pages.map(function(e) {
+			return e.route;
+		}).indexOf(event.currentTarget.id);
 
 		t.prevRoute = t.route;
 
@@ -55,21 +121,22 @@
 			chrome.tabs.create({url: t.pages[index].obj});
 		} else {
 			// some pages have functions to view them
-			t.pages[index].obj(index,event);
+			t.pages[index].obj(index, event);
 		}
 	};
 
 	/**
 	 * Show the Google Photos page
-	 *
-	 * @param {Integer} index index into t.pages Array
-	 *
+	 * @param {int} index index into [t.pages]{@link app.Options.t.pages}
+	 * @memberOf app.Options
 	 */
 	t.googlePhotos = function(index) {
 		if (!t.pages[index].ready) {
 			// create the page the first time
 			t.pages[index].ready = true;
-			t.gPhotosPage = new GooglePhotosPage('gPhotosPage', t.$.errorDialog, t.$.dialogTitle, t.$.dialogText);
+			t.gPhotosPage =
+				new app.GooglePhotosPage('gPhotosPage', t.$.errorDialog,
+					t.$.dialogTitle, t.$.dialogText);
 			Polymer.dom(t.$.googlePhotosInsertion).appendChild(t.gPhotosPage);
 		} else {
 			t.gPhotosPage.loadAlbumList();
@@ -79,33 +146,32 @@
 	};
 
 	/**
-	 * Show the FAQ page
-	 *
-	 * @param {Integer} index index into t.pages Array
-	 *
+	 * Show the help page
+	 * @param {int} index - index into [t.pages]{@link app.Options.t.pages}
+	 * @private
+	 * @memberOf app.Options
 	 */
-	t.faq = function(index) {
+	function _showHelpPage(index) {
 		if (!t.pages[index].ready) {
-			// create the page the first time
+			// insert the page the first time
 			t.pages[index].ready = true;
-			var el = new FaqPage();
-			Polymer.dom(t.$.faqInsertion).appendChild(el);
+			const el = new app.HelpPageFactory();
+			Polymer.dom(t.$.helpInsertion).appendChild(el);
 		}
 		t.route = t.pages[index].route;
 		t.scrollPageToTop();
-	};
+	}
 
 	/**
-	 * Show the Information for Nerds page
-	 *
-	 * @param {Integer} index index into t.pages Array
-	 *
+	 * Show the Help page
+	 * @param {int} index - index into [t.pages]{@link app.Options.t.pages}
+	 * @memberOf app.Options
 	 */
-	t.info = function(index) {
+	t.help = function(index) {
 		if (!t.pages[index].ready) {
 			// create the page the first time
 			t.pages[index].ready = true;
-			var el = new InfoPage();
+			const el = new app.HelpPage();
 			Polymer.dom(t.$.infoInsertion).appendChild(el);
 		}
 		t.route = t.pages[index].route;
@@ -114,26 +180,63 @@
 
 	/**
 	 * Display a preview of the screen saver
+	 * @memberOf app.Options
 	 */
 	t.preview = function() {
-		// select previous page
-		t.async(function() {t.$.mainMenu.select(t.prevRoute);}, 500);
-		chrome.runtime.sendMessage({window: 'show'});
+		// reselect previous page
+		t.async(function() {
+			t.$.mainMenu.select(t.prevRoute);
+		}, 500);
+		chrome.runtime.sendMessage({
+			message: 'showScreensaver',
+		}, function() {});
 	};
 
-	// list of pages
+	/**
+	 * Array of pages
+	 * @type {app.Options.Page[]}
+	 * @memberOf app.Options
+	 */
 	t.pages = [
-		{label: 'Settings', route: 'page-settings', icon: 'settings', obj: null, ready: true},
-		{label: 'Google Photos Albums', route: 'page-google-photos', icon: 'cloud', obj: t.googlePhotos, ready: false},
-		{label: 'Preview (Click or <Enter> to close)', route: 'page-preview', icon: 'pageview', obj: t.preview, ready: true},
-		{label: 'Frequently Asked Questions (FAQ)', route: 'page-faq', icon: 'help', obj: t.faq, ready: false},
-		{label: 'Information For Nerds', route: 'page-info', icon: 'info', obj: t.info, ready: false},
-		{label: 'Request Support', route: 'page-support', icon: 'help', obj: EXT_URI + 'support', ready: true},
-		{label: 'Rate Extension', route: 'page-rate', icon: 'grade', obj: EXT_URI + 'reviews', ready: true}
+		{
+			label: app.Utils.localize('menu_settings'), route: 'page-settings',
+			icon: 'myicons:settings', obj: null, ready: true, divider: false,
+		},
+		{
+			label: app.Utils.localize('menu_google'),
+			route: 'page-google-photos', icon: 'myicons:cloud',
+			obj: t.googlePhotos, ready: false, divider: false,
+		},
+		{
+			label: app.Utils.localize('menu_preview'), route: 'page-preview',
+			icon: 'myicons:pageview', obj: t.preview, ready: true,
+			divider: false,
+		},
+		{
+			label: app.Utils.localize('menu_help'), route: 'page-help',
+			icon: 'myicons:help', obj: _showHelpPage, ready: false,
+			divider: false,
+		},
+		{
+			label: app.Utils.localize('menu_support'), route: 'page-support',
+			icon: 'myicons:help', obj: `${EXT_URI}support`, ready: true,
+			divider: true,
+		},
+		{
+			label: app.Utils.localize('menu_rate'), route: 'page-rate',
+			icon: 'myicons:grade', obj: `${EXT_URI}reviews`, ready: true,
+			divider: false,
+		},
+		{
+			label: app.Utils.localize('menu_pushy'), route: 'page-pushy',
+			icon: 'myicons:extension', obj: PUSHY_URI, ready: true,
+			divider: true,
+		},
 	];
 
 	/**
 	 * Scroll page to top
+	 * @memberOf app.Options
 	 */
 	t.scrollPageToTop = function() {
 		t.$.scrollPanel.scrollToTop(true);
@@ -141,47 +244,41 @@
 
 	/**
 	 * Close drawer if drawerPanel is narrow
+	 * @memberOf app.Options
 	 */
 	t.closeDrawer = function() {
-		var drawerPanel = document.querySelector('#paperDrawerPanel');
+		const drawerPanel = document.querySelector('#paperDrawerPanel');
 		if (drawerPanel.narrow) {
 			drawerPanel.closeDrawer();
 		}
 	};
 
 	/**
-	 * Event Listener for display of Error Dialog
-	 *
-	 * @param {Event} event
-	 *
-	 */
-	t.onShowErrorDialog	= function(event) {
-		t.dialogTitle = event.detail.title;
-		t.dialogText = event.detail.text;
-		t.$.errorDialog.open();
-	};
-
-	/**
-	 * Listen for app messages
-	 *
-	 * @param {JSON} request object
-	 * @param {Object} sender MessageSender object
-	 * @param {function} response function to callback to sender
-	 *
+	 * Event: Fired when a message is sent from either an extension process<br>
+	 * (by runtime.sendMessage) or a content script (by tabs.sendMessage).
+	 * @see https://developer.chrome.com/extensions/runtime#event-onMessage
+	 * @param {Object} request - details for the message
+	 * @param {string} request.message - name of the message
+	 * @param {Object} sender - MessageSender object
+	 * @param {function} response - function to call once after processing
+	 * @returns {boolean} true if asynchronous
+	 * @private
+	 * @memberOf app.Options
 	 */
 	t.onMessage = function(request, sender, response) {
-		if (request.window === 'highlight') {
+		if (request.message === 'highlight') {
 			// highlight ourselves and let the sender know we are here
 			chrome.tabs.getCurrent(function(t) {
 				chrome.tabs.update(t.id, {'highlighted': true});
 			});
 			response(JSON.stringify({message: 'OK'}));
 		} else if (request.message === 'storageExceeded') {
-			// Display Error Dialog if a save action exceeded the localStorage limit
-			t.dialogTitle = 'Exceeded Storage Limits';
-			t.dialogText = 'Deselect other photo sources and try again.';
+			// Display Error Dialog if a save action exceeded the
+			// localStorage limit
+			t.dialogTitle = app.Utils.localize('err_storage_title');
+			t.dialogText = app.Utils.localize('err_storage_desc');
 			t.$.errorDialog.open();
 		}
+		return false;
 	};
-
 })(document);

@@ -1,6 +1,9 @@
 <!--
-@@license
--->
+  ~  Copyright (c) 2015-2017, Michael A. Updike All rights reserved.
+  ~  Licensed under the BSD-3-Clause
+  ~  https://opensource.org/licenses/BSD-3-Clause
+  ~  https://github.com/opus1269/photo-screen-saver/blob/master/LICENSE.md
+  -->
 <link rel="import" href="../../bower_components/polymer/polymer.html">
 <link rel="import" href="../../bower_components/neon-animation/neon-animation-behavior.html">
 <link rel="import" href="../../bower_components/neon-animation/web-animations.html">
@@ -21,29 +24,28 @@ Configuration:
 -->
 
 <script>
-
+'use strict';
 Polymer({
-
 	is: 'spin-down-animation',
 
 	behaviors: [
-		Polymer.NeonAnimationBehavior
+		Polymer.NeonAnimationBehavior,
 	],
 
 	configure: function(config) {
-		var node = config.node;
+		const node = config.node;
 
 		if (config.transformOrigin) {
-			this.setPrefixedProperty(node, 'transformOrigin', config.transformOrigin);
+			this.setPrefixedProperty(node, 'transformOrigin',
+				config.transformOrigin);
 		}
 
 		this._effect = new KeyframeEffect(node, [
 			{'transform': 'scale(1) rotate(1.0turn)'},
-			{'transform': 'scale(0) rotate(0)'}
+			{'transform': 'scale(0) rotate(0)'},
 		], this.timingFromConfig(config));
 
 		return this._effect;
-	}
-
+	},
 });
 </script>

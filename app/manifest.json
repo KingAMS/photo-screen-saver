@@ -1,21 +1,23 @@
 {
 	"manifest_version": 2,
-	"name": "Photo Screen Saver",
-	"short_name": "Photo Screen Saver",
-	"description": "A screensaver with multiple photo sources",
-	"version": "1.8.0",
+	"name": "__MSG_chrome_extension_name__",
+	"short_name": "__MSG_chrome_extension_name__",
+	"description": "__MSG_chrome_extension_description__",
+	"version": "2.0.0",
 	"minimum_chrome_version": "38",
+	"default_locale": "en_US",
 	"commands": {
 		"toggle-enabled": {
 			"suggested_key": {
 				"default": "Alt+Shift+Q"
 			},
-			"description": "Toggle enabled state"
+			"description": "__MSG_toggle_enabled__"
 		}
 	},
 	"icons": {
-		"19": "/images/icon_19.png",
-		"38": "/images/icon_38.png",
+		"16": "/images/icon_16.png",
+		"32": "/images/icon_32.png",
+		"48": "/images/icon_48.png",
 		"128": "/images/icon_128.png"
 	},
 	"content_security_policy": "script-src 'self' https://www.google-analytics.com; object-src 'self'",
@@ -46,15 +48,20 @@
 			"/scripts/use500px.js",
 			"/scripts/flickr.js",
 			"/scripts/utils.js",
+			"/scripts/storage.js",
+			"/scripts/data.js",
 			"/scripts/photo_sources.js",
-			"/scripts/bg_utils.js",
+			"/scripts/alarm.js",
+			"/scripts/ss_controller.js",
 			"/scripts/background.js"
 		],
 		"persistent": false
 	},
 	"browser_action": {
-		"default_title": "Photo Screen Saver - click for options",
-		"default_icon": "/images/icon_19.png"
+		"default_title": "__MSG_browser_action_title__",
+		"16": "/images/icon_16.png",
+		"24": "/images/icon_24.png",
+		"32": "/images/icon_32.png"
 	},
 	"options_page": "/html/options.html"
 }
