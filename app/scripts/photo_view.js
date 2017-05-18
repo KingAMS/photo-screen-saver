@@ -33,6 +33,17 @@ app.PhotoView = (function() {
 	 */
 	const SCREEN_ASPECT = screen.width / screen.height;
 
+    /**
+     * Path to google's geocode api
+     * @type {string}
+     * @const
+     * @default
+     * @private
+     * @memberOf app.PhotoView
+     */
+    const GOOGLE_APIS_URI =
+			'http://maps.googleapis.com/maps/api/geocode/json';
+
 	/**
 	 * Get references to the important elements of a slide
 	 * @param {int} idx - index into animated pages
@@ -47,6 +58,7 @@ app.PhotoView = (function() {
 		const ret = {};
 		ret.image = el.querySelector('.image');
 		ret.author = el.querySelector('.author');
+        ret.location = el.querySelector('.location');
 		ret.time = el.querySelector('.time');
 		ret.model = rep.modelForElement(ret.image);
 		ret.item = ret.model.get('item');
@@ -69,15 +81,21 @@ app.PhotoView = (function() {
 			right = (100 - aspect / SCREEN_ASPECT * 100) / 2;
 			e.author.style.right = (right + 1) + 'vw';
 			e.author.style.bottom = '';
+			e.location.style.left = (right + 1) + 'vw';
+            e.location.style.bottom = '';
 			e.time.style.right = (right + 1) + 'vw';
 			e.time.style.bottom = '';
 		} else {
 			bottom = (100 - SCREEN_ASPECT / aspect * 100) / 2;
 			e.author.style.bottom = (bottom + 1) + 'vh';
 			e.author.style.right = '';
+            e.location.style.bottom = (bottom + 1) + 'vh';
+            e.location.style.left = '';
 			e.time.style.bottom = (bottom + 3.5) + 'vh';
 			e.time.style.right = '';
 		}
+
+        e.location.style.maxWidth = ((aspect / SCREEN_ASPECT * 100) /2 )+ 'vh';
 	}
 
 	/**
@@ -104,6 +122,7 @@ app.PhotoView = (function() {
 		const e = _getElements(idx);
 		const model = e.model;
 		const author = e.author;
+        const location = e.location;
 		const time = e.time;
 		const image = e.image;
 		const img = image.$.img;
@@ -162,6 +181,13 @@ app.PhotoView = (function() {
 		author.style.opacity = 0.9;
 		author.style.fontSize = '2.5vh';
 		author.style.fontWeight = 300;
+
+        location.style.bottom = (screen.height - frHeight) / 2 + 10 + 'px';
+        location.style.color = 'black';
+        location.style.opacity = 0.9;
+        location.style.fontSize = '2.5vh';
+        location.style.fontWeight = 300;
+        location.style.maxWidth= (frWidth / 2) + 'px';
 
 		time.style.right = (screen.width - frWidth) / 2 + 10 + 'px';
 		time.style.textAlign = 'right';
@@ -276,6 +302,39 @@ app.PhotoView = (function() {
 				});
 			}
 			t.set('time', timeStr);
+        },
+
+
+		/**
+		* Get and set the location string
+		* @param {int} idx - index into animated pages
+		* @param {Object} t - Polymer template
+		* @memberOf app.PhotoView
+		*/
+		setLocation: function(idx, t) {
+			if (app.Storage.getBool('showLocation')) {
+				const e = _getElements(idx);
+				if (e.item && e.item.point) {
+					const request = GOOGLE_APIS_URI+'?latlng=' +
+										e.item.point + '&sensor=true';
+					const xhr = new XMLHttpRequest();
+
+					xhr.onload = function() {
+						const response = JSON.parse(xhr.response);
+						if (response.status && response.status === 'OK'
+							&& response.results
+							&& response.results.length > 0) {
+							const location =
+								response.results[0].formatted_address;
+							e.model.set('item.location', location);
+						}
+					};
+					xhr.open('GET', request, true);
+					xhr.send();
+
+				}
+
+			}
 		},
 	};
 })();

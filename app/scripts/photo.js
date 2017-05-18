@@ -21,6 +21,7 @@
 		this.type = source.type;
 		this.aspectRatio = source.asp;
 		this.ex = source.ex;
+        this.point = source.point;
 		this.width = screen.width;
 		this.height = screen.height;
 		this.label = this.buildLabel(false);

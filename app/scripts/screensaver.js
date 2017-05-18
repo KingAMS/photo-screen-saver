@@ -399,6 +399,7 @@
 			t.p.selected = selected;
 		}
 
+        app.PhotoView.setLocation(selected, t);
 		// setup the next timer --- runs forever
 		t.timer = window.setTimeout(t.runShow, t.waitTime);
 	};

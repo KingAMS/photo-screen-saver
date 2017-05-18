@@ -228,6 +228,12 @@
   "setting_photog_desc": {
     "message": "Nota: Siempre se muestra en modo Frame"
   },
+  "setting_location": {
+    "message": "Mostrar ubicación de la imagen"
+  },
+  "setting_location_desc": {
+    "message": "Si es aplicable, vea la ubicación donde se tomó la foto"
+  },
   "setting_bg": {
     "message": "Fondo"
   },
